@@ -6,7 +6,6 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "apscheduler>=3.11.3",
-    "en-core-web-md",
     "en-core-web-sm",
     "fastapi>=0.142.2",
     "feedparser>=6.0.14",
@@ -23,4 +22,3 @@ dev = [
 
 [tool.uv.sources]
 en-core-web-sm = { url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl" }
-en-core-web-md = { url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_md-3.8.0/en_core_web_md-3.8.0-py3-none-any.whl" }

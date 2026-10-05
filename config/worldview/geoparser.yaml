@@ -1,8 +1,9 @@
 # Settings for finding where articles happened (CLAUDE.md section 7).
 # Change these freely; no code changes needed. Restart Worldview afterwards.
 
-# spaCy language model used to spot place names. en_core_web_sm is small/fast;
-# en_core_web_md is larger. Both are installed.
+# spaCy language model used to spot place names. The medium model
+# (en_core_web_md) was tested and did no better on our news, so only the
+# small one is installed.
 spacy_model: en_core_web_sm
 
 # Places below this confidence (0–1) are kept in the database but not shown
