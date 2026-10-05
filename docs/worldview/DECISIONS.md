@@ -2,6 +2,17 @@
 
 Newest first. Each entry: what we chose, and why.
 
+## 2026-10-05 — Starter feeds approved
+
+- Owner approved all 34 feeds, including DW / France 24 / CBC World in place of
+  Reuters and AP, plus Global News BC, The Tyee and NPR Politics.
+- **ISW** is read through its public WordPress article list. The reader is one
+  small file (`wordpress.py`) and is used automatically for any feed URL
+  containing `/wp-json/wp/v2/posts`, so it can serve other WordPress sites
+  too. It needed no new settings or database changes.
+- **`feeds.opml` is re-read on every start**, so editing that one file is all it
+  takes to add, rename or disable a feed.
+
 ## 2026-10-05 — Phase 0/1 groundwork
 
 - **This repo is the God's Eye View fork.** It already contained GEV (MIT), so

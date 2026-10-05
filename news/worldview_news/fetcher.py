@@ -23,6 +23,7 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 import feedparser
 import httpx
 
+from . import wordpress
 from .feedcheck import make_client
 
 log = logging.getLogger(__name__)
@@ -110,12 +111,14 @@ def fetch_feed(conn: sqlite3.Connection, feed: sqlite3.Row, client: httpx.Client
     if feed["last_modified"]:
         headers["If-Modified-Since"] = feed["last_modified"]
     try:
-        resp = client.get(feed["url"], headers=headers)
+        wp = wordpress.is_wordpress_json(feed["url"])
+        url = wordpress.request_url(feed["url"]) if wp else feed["url"]
+        resp = client.get(url, headers=headers)
         if resp.status_code == 304:
             new = 0
         else:
             resp.raise_for_status()
-            parsed = feedparser.parse(resp.content)
+            parsed = wordpress.parse(resp.json()) if wp else feedparser.parse(resp.content)
             if not parsed.entries and parsed.bozo:
                 raise ValueError(f"not a valid feed ({parsed.bozo_exception})")
             new = store_entries(conn, feed, parsed, fetched)
@@ -126,7 +129,7 @@ def fetch_feed(conn: sqlite3.Connection, feed: sqlite3.Row, client: httpx.Client
         )
         conn.commit()
         return new
-    except (httpx.HTTPError, ValueError) as exc:
+    except (httpx.HTTPError, ValueError, KeyError, TypeError) as exc:
         conn.rollback()
         conn.execute(
             "UPDATE feeds SET last_fetched=?, last_error=?, error_count=error_count+1 WHERE id=?",

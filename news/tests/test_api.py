@@ -4,7 +4,7 @@ from worldview_news.api import create_app
 
 
 def make_client(tmp_path):
-    return TestClient(create_app(tmp_path / "t.sqlite3", start_scheduler=False))
+    return TestClient(create_app(tmp_path / "t.sqlite3", start_scheduler=False, import_opml=False))
 
 
 def test_saved_search_lifecycle(tmp_path):

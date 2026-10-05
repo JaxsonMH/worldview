@@ -221,8 +221,9 @@ Present this list to the owner for approval before importing.
 
 ## 16. Open items
 
-- Mac chip + RAM (decides whether optional local LLM is viable).
-- Owner to approve starter feed list (`docs/worldview/STARTER-FEEDS.md`).
+- Owner's Mac: **MacBook Pro, M3 Pro, 18 GB RAM.** Enough for an optional local LLM
+  via Ollama using a small model (~3–8B parameters, 4-bit, ~2–5 GB RAM); keep it optional.
+
 - Owner to sign up for free keys when a layer needs one (walk them through it).
 - Arc-based feeds (CTV, CP24, BNN Bloomberg) mislabel times by ~4 h; add per-feed time correction.
 
@@ -236,6 +237,6 @@ Code layout: `news/` (Python news service), `config/worldview/` (feeds, topics),
   ☐ owner runs setup on the Mac and confirms the globe renders.
 - **Phase 1:** ✔ SQLite schema ✔ fetcher (scheduled, ETag, dedupe, future-date clamp, GeoRSS)
   ✔ shared filter object + saved-search CRUD API ✔ tests (`make test`)
-  ✔ starter feeds verified — awaiting approval
-  ☐ write approved list to `feeds.opml` + import ☐ ISW JSON reader ☐ geoparser (spaCy + GeoNames + Nominatim)
+  ✔ starter feeds approved (34, incl. substitutes + extras) → `config/worldview/feeds.opml`,
+  auto-imported on every start ✔ ISW read via WordPress JSON (`wordpress.py`) ☐ geoparser (spaCy + GeoNames + Nominatim)
   ☐ rule-based topic tagger ☐ reader UI tab + `/api/news` proxy in Vite ☐ 50-article geo spot-check.

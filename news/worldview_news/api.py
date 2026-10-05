@@ -22,7 +22,7 @@ from . import config
 from .db import connect, init_db
 from .fetcher import fetch_all, iso
 from .filters import ArticleFilter, select_articles
-from .opml import export_opml
+from .opml import export_opml, import_feeds, read_opml
 from .topics import load_topics
 
 log = logging.getLogger(__name__)
@@ -45,9 +45,13 @@ class FeedPatch(BaseModel):
     default_topic: str | None = None
 
 
-def create_app(db_path=None, start_scheduler: bool = True) -> FastAPI:
+def create_app(db_path=None, start_scheduler: bool = True, import_opml: bool = True) -> FastAPI:
     conn = connect(db_path or config.DB_PATH)
     init_db(conn)
+    if import_opml and config.FEEDS_OPML.exists():
+        # feeds.opml is the source of truth: re-reading it on every start picks up edits.
+        added, updated = import_feeds(conn, read_opml(config.FEEDS_OPML))
+        log.info("feeds.opml: %d added, %d updated", added, updated)
     lock = threading.Lock()  # one writer at a time (fetcher vs. API clicks)
     scheduler = BackgroundScheduler()
 

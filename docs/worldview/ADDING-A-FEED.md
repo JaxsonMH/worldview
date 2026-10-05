@@ -3,9 +3,6 @@
 Feeds are listed in **`config/worldview/feeds.opml`** — a standard file every
 RSS reader understands, so you can also import/export it from other apps.
 
-> Status: the starter list is awaiting approval (see STARTER-FEEDS.md), so
-> `feeds.opml` doesn't exist yet. Once approved, these steps apply.
-
 ## 1. Find the feed address
 
 Most news sites have one; try the site's address followed by `/feed`, `/rss`,
@@ -28,10 +25,12 @@ Copy an existing line inside the right folder and change the name, URL and topic
 
 ## 3. Load it
 
-```
-cd news && uv run python -m worldview_news import-opml
-```
-Running this again is safe: existing feeds are updated, not duplicated.
+Just restart Worldview (`./start.sh`) — it re-reads `feeds.opml` every time it
+starts. Existing feeds are updated, never duplicated. (To load without
+restarting: `cd news && uv run python -m worldview_news import-opml`.)
+
+**Site has no RSS but runs WordPress?** Use its article list instead:
+`https://SITE/wp-json/wp/v2/posts` — Worldview recognises these automatically.
 
 ## Removing a feed
 

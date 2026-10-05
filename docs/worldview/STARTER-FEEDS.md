@@ -1,8 +1,8 @@
-# Starter feeds — for approval
+# Starter feeds
 
 Checked 2026-10-05 by actually downloading each one
 (`make verify-feeds`; the list itself is `config/worldview/feed-candidates.yaml`).
-**Nothing is imported until you approve.**
+**Approved 2026-10-05** (substitutes and extras included). The live list is `config/worldview/feeds.opml`.
 
 "Paywall" = headlines and summaries come through fine, but opening the full
 article may need a subscription.
@@ -61,10 +61,10 @@ article may need a subscription.
 ## Conflict / OSINT
 | Feed | Status | Notes |
 |---|---|---|
-| Institute for the Study of War | ⚠️ no RSS | Their 2025 site redesign switched RSS off. Their site offers a public article list (WordPress JSON) — we can add a small reader for it. |
+| Institute for the Study of War | ✅ via reader | Their 2025 redesign switched RSS off; we read their public WordPress article list instead (`news/worldview_news/wordpress.py`). |
 | Bellingcat | ✅ | Posts every few days. |
 | War on the Rocks | ✅ | |
 | Defense News | ✅ | |
 | The War Zone | ✅ | |
 
-**Totals:** 25 of your 28 outlets work (27 feeds, since CBC and the Globe each get two). Reuters and AP have no feed → 3 substitutes offered. ISW needs a small custom reader. Plus 3 suggested extras. Approving everything = **33 feeds**.
+**Totals:** 25 of your 28 outlets work (27 feeds, since CBC and the Globe each get two). Reuters and AP have no feed → 3 substitutes offered. ISW needs a small custom reader. Plus 3 suggested extras. All approved = **34 feeds**.

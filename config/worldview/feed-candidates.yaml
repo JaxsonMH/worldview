@@ -1,4 +1,4 @@
-# Proposed starter feeds (CLAUDE.md section 15) — AWAITING OWNER APPROVAL.
+# Starter feeds (CLAUDE.md section 15) — approved by owner 2026-10-05; imported via feeds.opml.
 # Every URL below was checked on 2026-10-05 with
 #   cd news && uv run python -m worldview_news.verify_feeds
 # Nothing here is imported until the owner approves; the approved set will be
@@ -46,7 +46,7 @@
 - {name: The Verge, folder: Tech, topic: Technology, status: ok, url: "https://www.theverge.com/rss/index.xml"}
 - {name: Hacker News (front page), folder: Tech, topic: Technology, status: ok, url: "https://news.ycombinator.com/rss"}
 
-- {name: Institute for the Study of War, folder: Conflict & OSINT, topic: Conflict & Military, status: adapter, url: "https://understandingwar.org/wp-json/wp/v2/posts", note: "Site redesign turned off RSS (/feed/ redirects to the homepage). Its public WordPress JSON list works; needs a ~30-line reader."}
+- {name: Institute for the Study of War, folder: Conflict & OSINT, topic: Conflict & Military, status: adapter, url: "https://understandingwar.org/wp-json/wp/v2/posts", note: "Site redesign turned off RSS. Read via its public WordPress article list (worldview_news/wordpress.py)."}
 - {name: Bellingcat, folder: Conflict & OSINT, topic: Conflict & Military, status: ok, url: "https://www.bellingcat.com/feed/"}
 - {name: War on the Rocks, folder: Conflict & OSINT, topic: Conflict & Military, status: ok, url: "https://warontherocks.com/feed/"}
 - {name: Defense News, folder: Conflict & OSINT, topic: Conflict & Military, status: ok, url: "https://www.defensenews.com/arc/outboundfeeds/rss/?outputType=xml"}

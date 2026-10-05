@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opml version="2.0">
+  <head>
+    <title>Worldview feeds</title>
+  </head>
+  <body>
+    <outline text="Business" title="Business">
+      <outline type="rss" text="BNN Bloomberg" title="BNN Bloomberg" xmlUrl="https://www.bnnbloomberg.ca/arc/outboundfeeds/rss/?outputType=xml" category="Business &amp; Markets" />
+      <outline type="rss" text="CNBC Top News" title="CNBC Top News" xmlUrl="https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&amp;id=100003114" category="Business &amp; Markets" />
+      <outline type="rss" text="Financial Post" title="Financial Post" xmlUrl="https://financialpost.com/feed/" category="Business &amp; Markets" />
+    </outline>
+    <outline text="Canada" title="Canada">
+      <outline type="rss" text="CBC News (Politics)" title="CBC News (Politics)" xmlUrl="https://www.cbc.ca/webfeed/rss/rss-politics" category="Canadian Politics" />
+      <outline type="rss" text="CBC News (Top Stories)" title="CBC News (Top Stories)" xmlUrl="https://www.cbc.ca/webfeed/rss/rss-topstories" category="Canadian Politics" />
+      <outline type="rss" text="CTV News" title="CTV News" xmlUrl="https://www.ctvnews.ca/arc/outboundfeeds/rss/?outputType=xml" category="Canadian Politics" />
+      <outline type="rss" text="Globe and Mail (Canada)" title="Globe and Mail (Canada)" xmlUrl="https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/canada/" category="Canadian Politics" />
+      <outline type="rss" text="Globe and Mail (Politics)" title="Globe and Mail (Politics)" xmlUrl="https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/politics/" category="Canadian Politics" />
+      <outline type="rss" text="National Post (Canada)" title="National Post (Canada)" xmlUrl="https://nationalpost.com/category/news/canada/feed" category="Canadian Politics" />
+      <outline type="rss" text="The Canadian Press" title="The Canadian Press" xmlUrl="https://www.thecanadianpressnews.ca/search/?f=rss&amp;t=article&amp;l=50&amp;s=start_time&amp;sd=desc" category="Canadian Politics" />
+      <outline type="rss" text="iPolitics" title="iPolitics" xmlUrl="https://www.ipolitics.ca/feed/" category="Canadian Politics" />
+    </outline>
+    <outline text="Conflict &amp; OSINT" title="Conflict &amp; OSINT">
+      <outline type="rss" text="Bellingcat" title="Bellingcat" xmlUrl="https://www.bellingcat.com/feed/" category="Conflict &amp; Military" />
+      <outline type="rss" text="Defense News" title="Defense News" xmlUrl="https://www.defensenews.com/arc/outboundfeeds/rss/?outputType=xml" category="Conflict &amp; Military" />
+      <outline type="rss" text="Institute for the Study of War" title="Institute for the Study of War" xmlUrl="https://understandingwar.org/wp-json/wp/v2/posts" category="Conflict &amp; Military" />
+      <outline type="rss" text="The War Zone" title="The War Zone" xmlUrl="https://www.twz.com/feed" category="Conflict &amp; Military" />
+      <outline type="rss" text="War on the Rocks" title="War on the Rocks" xmlUrl="https://warontherocks.com/feed/" category="Conflict &amp; Military" />
+    </outline>
+    <outline text="Local" title="Local">
+      <outline type="rss" text="CBC British Columbia" title="CBC British Columbia" xmlUrl="https://www.cbc.ca/webfeed/rss/rss-canada-britishcolumbia" category="Local" />
+      <outline type="rss" text="CHEK News" title="CHEK News" xmlUrl="https://www.cheknews.ca/feed/" category="Local" />
+      <outline type="rss" text="Capital Daily" title="Capital Daily" xmlUrl="https://www.capitaldaily.ca/news/rss.xml" category="Local" />
+      <outline type="rss" text="Global News BC" title="Global News BC" xmlUrl="https://globalnews.ca/bc/feed/" category="BC Politics" />
+      <outline type="rss" text="The Tyee" title="The Tyee" xmlUrl="https://thetyee.ca/rss2.xml" category="BC Politics" />
+      <outline type="rss" text="Times Colonist (Local News)" title="Times Colonist (Local News)" xmlUrl="https://www.timescolonist.com/rss/local-news" category="Local" />
+      <outline type="rss" text="Victoria News (Black Press)" title="Victoria News (Black Press)" xmlUrl="https://www.vicnews.com/feed/" category="Local" />
+    </outline>
+    <outline text="Tech" title="Tech">
+      <outline type="rss" text="Ars Technica" title="Ars Technica" xmlUrl="https://feeds.arstechnica.com/arstechnica/index" category="Technology" />
+      <outline type="rss" text="Hacker News (front page)" title="Hacker News (front page)" xmlUrl="https://news.ycombinator.com/rss" category="Technology" />
+      <outline type="rss" text="The Verge" title="The Verge" xmlUrl="https://www.theverge.com/rss/index.xml" category="Technology" />
+    </outline>
+    <outline text="World" title="World">
+      <outline type="rss" text="Al Jazeera" title="Al Jazeera" xmlUrl="https://www.aljazeera.com/xml/rss/all.xml" category="World Politics" />
+      <outline type="rss" text="BBC World" title="BBC World" xmlUrl="https://feeds.bbci.co.uk/news/world/rss.xml" category="World Politics" />
+      <outline type="rss" text="CBC World" title="CBC World" xmlUrl="https://www.cbc.ca/webfeed/rss/rss-world" category="World Politics" />
+      <outline type="rss" text="DW (Deutsche Welle) World" title="DW (Deutsche Welle) World" xmlUrl="https://rss.dw.com/rdf/rss-en-world" category="World Politics" />
+      <outline type="rss" text="France 24" title="France 24" xmlUrl="https://www.france24.com/en/rss" category="World Politics" />
+      <outline type="rss" text="NPR Politics" title="NPR Politics" xmlUrl="https://feeds.npr.org/1014/rss.xml" category="US Politics" />
+      <outline type="rss" text="NPR World" title="NPR World" xmlUrl="https://feeds.npr.org/1004/rss.xml" category="World Politics" />
+      <outline type="rss" text="The Guardian World" title="The Guardian World" xmlUrl="https://www.theguardian.com/world/rss" category="World Politics" />
+    </outline>
+  </body>
+</opml>

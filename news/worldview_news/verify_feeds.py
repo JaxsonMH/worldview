@@ -22,7 +22,7 @@ def main(path: str) -> int:
     with make_client() as client:
         for cand in candidates:
             urls = cand.get("urls") or ([cand["url"]] if cand.get("url") else [])
-            if not urls or cand.get("status") == "adapter":
+            if not urls:
                 print(f"SKIP\t{cand['name']}\t{cand.get('note', 'no RSS feed')}")
                 continue
             attempts = []

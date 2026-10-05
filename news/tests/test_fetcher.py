@@ -81,3 +81,23 @@ def test_opml_round_trip(conn, tmp_path):
     assert {(f["title"], f["folder"], f["default_topic"]) for f in feeds} == {
         ("A", "Local", "Local"), ("B", "World", "World Politics")}
     assert import_feeds(conn, feeds) == (0, 2)
+
+
+def test_wordpress_json_feed(conn):
+    import json
+
+    add_feed(conn, "https://isw.test/wp-json/wp/v2/posts", title="ISW", topic="Conflict & Military")
+    posts = [{"id": 7, "date_gmt": "2026-10-05T22:29:05", "link": "https://isw.test/a",
+              "title": {"rendered": "Ukraine&#8217;s air defense"}, "excerpt": {"rendered": "<p>Toplines</p>"}}]
+    client = mock_client({"https://isw.test/wp-json/wp/v2/posts?per_page=20&_fields=id,date_gmt,link,title,excerpt": json.dumps(posts)})
+    assert fetch_all(conn, client) == {"ISW": 1}
+    row = conn.execute("SELECT title, published_at FROM articles").fetchone()
+    assert (row["title"], row["published_at"]) == ("Ukraine’s air defense", "2026-10-05T22:29:05Z")
+
+
+def test_starter_opml_is_valid():
+    from pathlib import Path
+
+    feeds = read_opml(Path(__file__).resolve().parents[2] / "config" / "worldview" / "feeds.opml")
+    assert len(feeds) == len({f["url"] for f in feeds}) >= 30
+    assert all(f["folder"] and f["default_topic"] for f in feeds)
