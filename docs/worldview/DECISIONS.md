@@ -2,6 +2,26 @@
 
 Newest first. Each entry: what we chose, and why.
 
+## 2026-10-05 — Canada topic and subject topics
+
+- Owner asked for a general **Canada** topic, and for crime, sports and other
+  subjects to have their own topics. Added: Canada, Crime & Justice, Sports,
+  Health, Arts & Culture.
+- **Feeds give a broad topic; keywords add the subject.** CBC Top Stories,
+  CTV, Globe and Mail (Canada), National Post, Canadian Press and Global News
+  BC now default to Canada (they were Canadian Politics / BC Politics, which
+  mislabelled crime and sports). CBC Politics, Globe Politics and iPolitics
+  keep Canadian Politics; The Tyee keeps BC Politics.
+- **Canadian Politics keywords only count on Canadian articles**
+  (`only_with_topics` in topics.yaml); otherwise "election" tagged stories
+  about Pakistan and Israel.
+- **`make reprocess` now also re-applies feed default topics**, so changing a
+  feed's topic re-labels its old articles too (hand-tagged ones are kept).
+- Checked on 1,077 live articles: Crime & Justice 88, Health 28, Sports 19,
+  Arts & Culture 11, Canadian Politics (by keyword) 48, with headlines read
+  by eye. Remaining oddities are rare (e.g. a fighter-jet story tagged
+  Sports); tune keywords in topics.yaml.
+
 ## 2026-10-05 — Geoparser, topics, Reader
 
 - **Place list = GeoNames `cities1000` (towns of 1,000+ people worldwide) +

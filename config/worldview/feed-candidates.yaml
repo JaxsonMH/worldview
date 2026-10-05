@@ -15,16 +15,16 @@
 - {name: Victoria News (Black Press), folder: Local, topic: Local, status: ok, url: "https://www.vicnews.com/feed/"}
 - {name: CBC British Columbia, folder: Local, topic: Local, status: ok, url: "https://www.cbc.ca/webfeed/rss/rss-canada-britishcolumbia"}
 - {name: Capital Daily, folder: Local, topic: Local, status: ok, url: "https://www.capitaldaily.ca/news/rss.xml"}
-- {name: Global News BC, folder: Local, topic: BC Politics, status: extra, url: "https://globalnews.ca/bc/feed/"}
+- {name: Global News BC, folder: Local, topic: Canada, status: extra, url: "https://globalnews.ca/bc/feed/"}
 - {name: The Tyee, folder: Local, topic: BC Politics, status: extra, url: "https://thetyee.ca/rss2.xml"}
 
-- {name: CBC News (Top Stories), folder: Canada, topic: Canadian Politics, status: ok, url: "https://www.cbc.ca/webfeed/rss/rss-topstories"}
+- {name: CBC News (Top Stories), folder: Canada, topic: Canada, status: ok, url: "https://www.cbc.ca/webfeed/rss/rss-topstories"}
 - {name: CBC News (Politics), folder: Canada, topic: Canadian Politics, status: ok, url: "https://www.cbc.ca/webfeed/rss/rss-politics"}
-- {name: CTV News, folder: Canada, topic: Canadian Politics, status: ok, url: "https://www.ctvnews.ca/arc/outboundfeeds/rss/?outputType=xml"}
-- {name: Globe and Mail (Canada), folder: Canada, topic: Canadian Politics, status: ok, url: "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/canada/"}
+- {name: CTV News, folder: Canada, topic: Canada, status: ok, url: "https://www.ctvnews.ca/arc/outboundfeeds/rss/?outputType=xml"}
+- {name: Globe and Mail (Canada), folder: Canada, topic: Canada, status: ok, url: "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/canada/"}
 - {name: Globe and Mail (Politics), folder: Canada, topic: Canadian Politics, status: ok, url: "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/politics/"}
-- {name: National Post (Canada), folder: Canada, topic: Canadian Politics, status: ok, url: "https://nationalpost.com/category/news/canada/feed"}
-- {name: The Canadian Press, folder: Canada, topic: Canadian Politics, status: ok, url: "https://www.thecanadianpressnews.ca/search/?f=rss&t=article&l=50&s=start_time&sd=desc"}
+- {name: National Post (Canada), folder: Canada, topic: Canada, status: ok, url: "https://nationalpost.com/category/news/canada/feed"}
+- {name: The Canadian Press, folder: Canada, topic: Canada, status: ok, url: "https://www.thecanadianpressnews.ca/search/?f=rss&t=article&l=50&s=start_time&sd=desc"}
 - {name: iPolitics, folder: Canada, topic: Canadian Politics, status: ok, url: "https://www.ipolitics.ca/feed/"}
 
 - {name: Reuters, folder: World, topic: World Politics, status: none, note: "Reuters shut down its public RSS feeds in 2020; every known URL returns 404."}

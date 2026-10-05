@@ -1,11 +1,23 @@
 # Topic list for Worldview (CLAUDE.md section 8). Edit freely:
 #   name     what appears in the app
 #   color    pin / badge colour on the globe and in the reader
-#   keywords optional words that suggest this topic (used by the rule tagger)
+#   keywords optional words that suggest this topic (used by the rule tagger).
+#            One in the headline is enough; in the summary it takes two
+#            different ones. Whole words only, capitals ignored.
+#   only_with_topics  optional: the keywords only count if the article already
+#            has one of these topics (so "election" in a BBC story about
+#            Pakistan isn't tagged Canadian Politics).
+#
+# An article can have several topics: a CTV robbery story is "Canada" (from
+# its feed) plus "Crime & Justice" (from its keywords). After editing, run
+# `make reprocess` so existing articles pick up the change.
 topics:
   - name: Local
     description: Greater Victoria / Vancouver Island
     color: "#2a9d8f"
+  - name: Canada
+    description: General Canadian news (the default for national news feeds)
+    color: "#e4572e"
   - name: BC Politics
     color: "#1d6fa5"
     keywords: [B.C. legislature, BC legislature, MLA, MLAs, Eby, Rustad, BC NDP, B.C. NDP,
@@ -15,6 +27,7 @@ topics:
     keywords: [Parliament, House of Commons, MP, MPs, prime minister, Senate, Elections Canada,
       Carney, Poilievre, Liberals, Conservatives, NDP, Bloc Québécois, cabinet, minister, premier,
       election, riding, legislation, bill C-]
+    only_with_topics: [Canada, Local, BC Politics]
   - name: US Politics
     color: "#6c5ce7"
     keywords: [Congress, Senate, White House, Supreme Court, governor]
@@ -30,21 +43,42 @@ topics:
     keywords: [missile, drone strike, troops, ceasefire, airstrike, offensive]
   - name: Disasters & Environment
     color: "#f77f00"
-    keywords: [wildfire, earthquake, flood, evacuation, tsunami, atmospheric river, drought]
+    keywords: [wildfire, wildfires, earthquake, flood, flooding, evacuation, evacuation order, tsunami,
+      atmospheric river, drought, heat dome, hurricane, tornado, climate change, old-growth]
+  - name: Crime & Justice
+    color: "#5c4d7d"
+    keywords: [police, RCMP, OPP, arrested, arrest, charged, murder, homicide, manslaughter,
+      assault, sexual assault, stabbing, shooting, robbery, theft, stolen, fraud, extortion,
+      trial, sentenced, convicted, acquitted, jury, prosecutors, Crown, inmate, prison, impounded]
+  - name: Sports
+    color: "#2b9348"
+    keywords: [NHL, NBA, NFL, MLB, MLS, CFL, WNBA, PWHL, Canucks, Oilers, Flames, Maple Leafs, Canadiens,
+      Senators, Jets, Kraken, Raptors, Blue Jays, Whitecaps, BC Lions, Stanley Cup, Grey Cup, World Cup,
+      Olympic, Olympics, Olympian, Paralympic, hockey, soccer, basketball, baseball, football, curling,
+      tennis, golf, goaltender, quarterback, playoffs, marathon, Ovechkin, McDavid]
+  - name: Health
+    color: "#d1495b"
+    keywords: [hospital, hospitals, health care, health-care, emergency room, ER closures, doctors, nurses,
+      measles, mpox, vaccine, vaccines, outbreak, pandemic, cancer, overdose, toxic drug, opioid,
+      mental health, long-term care, public health]
+  - name: Arts & Culture
+    color: "#c77dff"
+    keywords: [film, films, movie, festival, concert, album, musician, singer, theatre, theater,
+      actor, actress, author, novel, artist, art gallery, museum, TIFF, VIFF, Oscars, Grammy, Juno Awards]
 
 # Place rules: add a topic based on where the article happened (after geoparsing).
 #   within_box: any confident place inside this rectangle (south/north latitude,
 #               west/east longitude) adds the topic.
 #   if_topic + all_places_in: if the article already has `if_topic` and every
 #               confident place (ignoring whole countries) is in that province/state.
-#   needs_keyword_from: also require a keyword from one of these topics. Used for
-#               BC Politics because general news feeds (CTV, CBC Top Stories)
-#               default to Canadian Politics even for crime or business stories.
+#               `if_topic` may be one topic or a list (any of them).
+#   needs_keyword_from: also require a keyword from one of these topics, so a
+#               BC crime or sports story doesn't count as BC Politics.
 place_rules:
   - topic: Local
     # Vancouver Island, the Gulf Islands and the Sunshine Coast. Edit to taste.
     within_box: {south: 48.25, north: 51.0, west: -128.6, east: -123.27}
   - topic: BC Politics
-    if_topic: Canadian Politics
+    if_topic: [Canada, Canadian Politics]
     all_places_in: {country: CA, admin1: "02"}
     needs_keyword_from: [BC Politics, Canadian Politics]

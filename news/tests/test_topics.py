@@ -1,4 +1,4 @@
-from worldview_news.topics import apply_rules, keyword_topics, set_manual_topics
+from worldview_news.topics import apply_rules, keyword_topics, refresh_feed_defaults, set_manual_topics
 
 CFG = {
     "topics": [
@@ -8,7 +8,7 @@ CFG = {
     ],
     "place_rules": [
         {"topic": "Local", "within_box": {"south": 48.25, "north": 51.0, "west": -128.6, "east": -123.27}},
-        {"topic": "BC Politics", "if_topic": "Canadian Politics", "all_places_in": {"country": "CA", "admin1": "02"},
+        {"topic": "BC Politics", "if_topic": ["Canada", "Canadian Politics"], "all_places_in": {"country": "CA", "admin1": "02"},
          "needs_keyword_from": ["BC Politics"]},
     ],
 }
@@ -68,3 +68,36 @@ def test_manual_topics_win(conn):
     set_manual_topics(conn, 1, ["Technology"])
     assert apply_rules(conn, 1, "Wildfire", "", CFG) == set()
     assert topics(conn) == {"Technology"}
+
+
+def test_general_canada_story_in_bc_with_politics_keyword(conn):
+    seed(conn, [(49.25, -123.12, "CA", "02", "city", 0.9)], topic="Canada")
+    assert apply_rules(conn, 1, "BC NDP promises new tax", "", CFG) == {"BC Politics"}
+
+
+def test_changing_a_feed_topic_relabels_old_articles_but_not_manual_ones(conn):
+    seed(conn, [], topic="Canadian Politics")
+    conn.execute("UPDATE feeds SET default_topic = 'Canada'")
+    refresh_feed_defaults(conn)
+    assert topics(conn) == {"Canada"}
+    set_manual_topics(conn, 1, ["Sports"])
+    refresh_feed_defaults(conn)
+    assert topics(conn) == {"Sports"}
+
+
+def test_real_topics_file_parses_and_has_new_topics():
+    from worldview_news.topics import load_config
+
+    cfg = load_config()
+    names = [t["name"] for t in cfg["topics"]]
+    assert {"Canada", "Crime & Justice", "Sports"} <= set(names)
+    assert len(names) == len(set(names))
+    assert keyword_topics(cfg, "Canucks beat Oilers in overtime", "") >= {"Sports"}
+    assert keyword_topics(cfg, "Man charged with murder in Saanich", "") >= {"Crime & Justice"}
+
+
+def test_topic_keywords_can_be_limited_to_other_topics():
+    cfg = {"topics": [{"name": "Canada"}, {"name": "Canadian Politics", "keywords": ["election"],
+                                           "only_with_topics": ["Canada"]}]}
+    assert keyword_topics(cfg, "Pakistan election called", "", {"World Politics"}) == set()
+    assert keyword_topics(cfg, "Quebec election called", "", {"Canada"}) == {"Canadian Politics"}

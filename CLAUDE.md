@@ -117,10 +117,15 @@ works without it. Depends on the Mac's RAM.
 
 ## 8. Topics
 
-Starting taxonomy (editable in a config file, not hard-coded):
-Local (Greater Victoria / Vancouver Island) · BC Politics · Canadian Politics ·
-US Politics · World Politics · Business & Markets · Technology · Conflict & Military ·
-Disasters & Environment.
+Taxonomy (editable in `config/worldview/topics.yaml`, not hard-coded):
+Local (Greater Victoria / Vancouver Island) · Canada (general Canadian news) · BC Politics ·
+Canadian Politics · US Politics · World Politics · Business & Markets · Technology ·
+Conflict & Military · Disasters & Environment · Crime & Justice · Sports · Health · Arts & Culture.
+
+Articles can carry several topics. Feeds give a *broad* default (e.g. CTV → Canada);
+subject topics (crime, sports, health, politics…) come from keyword rules on top,
+so "Canada + Crime & Justice" is normal. Politics topics are never a feed default
+for general news feeds.
 
 Tagging order: feed default → keyword/place rules (e.g. Canadian article whose
 places are all in BC → BC Politics) → optional local model. Users can re-tag manually.
@@ -225,8 +230,6 @@ Present this list to the owner for approval before importing.
   via Ollama using a small model (~3–8B parameters, 4-bit, ~2–5 GB RAM); keep it optional.
 - Owner to sign up for free keys when a layer needs one (walk them through it).
 - Arc-based feeds (CTV, CP24, BNN Bloomberg) mislabel times by ~4 h; add per-feed time correction.
-- General news feeds (CTV, CBC Top Stories, Globe Canada, National Post, CP) default to
-  "Canadian Politics" even for crime/sports stories. Ask owner: add a general "Canada" topic?
 - Owner to do their own geo spot-check (`make spot-check`) once running on the Mac.
 
 ## 17. Progress (keep updated)

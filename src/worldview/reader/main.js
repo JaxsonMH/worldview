@@ -1223,7 +1223,7 @@ function renderFeeds() {
               );
               if (done)
                 toast(
-                  `New articles from ${f.title} will be tagged ${e.target.value}`,
+                  `New articles from ${f.title} will be tagged ${e.target.value}. Run “make reprocess” to re-label older ones.`,
                   'ok',
                 );
             },

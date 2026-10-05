@@ -4,7 +4,7 @@
     uv run python -m worldview_news import-opml    load config/worldview/feeds.opml
     uv run python -m worldview_news fetch          fetch every feed once, then find places + topics
     uv run python -m worldview_news process        find places + topics for articles not done yet
-    uv run python -m worldview_news reprocess      redo places + rule topics for every article
+    uv run python -m worldview_news reprocess      redo feed topics, places + rule topics for every article
                                                    (after editing topics.yaml, geoparser.yaml
                                                    or place-aliases.yaml; manual topics are kept)
     uv run python -m worldview_news gazetteer      download GeoNames and build the place list
@@ -62,6 +62,12 @@ def main() -> None:
         for title, new in fetch_all(conn).items():
             print(f"{new:4d} new  {title}")
     if args.cmd == "reprocess":
+        from .opml import import_feeds, read_opml
+        from .topics import refresh_feed_defaults
+
+        if config.FEEDS_OPML.exists():
+            import_feeds(conn, read_opml(config.FEEDS_OPML))  # pick up edited default topics
+        refresh_feed_defaults(conn)
         conn.execute("DELETE FROM article_topics WHERE source = 'rule'")
         conn.execute("UPDATE articles SET geo_done_at = NULL")
         conn.commit()

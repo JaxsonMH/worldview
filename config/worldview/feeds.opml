@@ -11,12 +11,12 @@
     </outline>
     <outline text="Canada" title="Canada">
       <outline type="rss" text="CBC News (Politics)" title="CBC News (Politics)" xmlUrl="https://www.cbc.ca/webfeed/rss/rss-politics" category="Canadian Politics" />
-      <outline type="rss" text="CBC News (Top Stories)" title="CBC News (Top Stories)" xmlUrl="https://www.cbc.ca/webfeed/rss/rss-topstories" category="Canadian Politics" />
-      <outline type="rss" text="CTV News" title="CTV News" xmlUrl="https://www.ctvnews.ca/arc/outboundfeeds/rss/?outputType=xml" category="Canadian Politics" />
-      <outline type="rss" text="Globe and Mail (Canada)" title="Globe and Mail (Canada)" xmlUrl="https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/canada/" category="Canadian Politics" />
+      <outline type="rss" text="CBC News (Top Stories)" title="CBC News (Top Stories)" xmlUrl="https://www.cbc.ca/webfeed/rss/rss-topstories" category="Canada" />
+      <outline type="rss" text="CTV News" title="CTV News" xmlUrl="https://www.ctvnews.ca/arc/outboundfeeds/rss/?outputType=xml" category="Canada" />
+      <outline type="rss" text="Globe and Mail (Canada)" title="Globe and Mail (Canada)" xmlUrl="https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/canada/" category="Canada" />
       <outline type="rss" text="Globe and Mail (Politics)" title="Globe and Mail (Politics)" xmlUrl="https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/politics/" category="Canadian Politics" />
-      <outline type="rss" text="National Post (Canada)" title="National Post (Canada)" xmlUrl="https://nationalpost.com/category/news/canada/feed" category="Canadian Politics" />
-      <outline type="rss" text="The Canadian Press" title="The Canadian Press" xmlUrl="https://www.thecanadianpressnews.ca/search/?f=rss&amp;t=article&amp;l=50&amp;s=start_time&amp;sd=desc" category="Canadian Politics" />
+      <outline type="rss" text="National Post (Canada)" title="National Post (Canada)" xmlUrl="https://nationalpost.com/category/news/canada/feed" category="Canada" />
+      <outline type="rss" text="The Canadian Press" title="The Canadian Press" xmlUrl="https://www.thecanadianpressnews.ca/search/?f=rss&amp;t=article&amp;l=50&amp;s=start_time&amp;sd=desc" category="Canada" />
       <outline type="rss" text="iPolitics" title="iPolitics" xmlUrl="https://www.ipolitics.ca/feed/" category="Canadian Politics" />
     </outline>
     <outline text="Conflict &amp; OSINT" title="Conflict &amp; OSINT">
@@ -30,7 +30,7 @@
       <outline type="rss" text="CBC British Columbia" title="CBC British Columbia" xmlUrl="https://www.cbc.ca/webfeed/rss/rss-canada-britishcolumbia" category="Local" />
       <outline type="rss" text="CHEK News" title="CHEK News" xmlUrl="https://www.cheknews.ca/feed/" category="Local" />
       <outline type="rss" text="Capital Daily" title="Capital Daily" xmlUrl="https://www.capitaldaily.ca/news/rss.xml" category="Local" />
-      <outline type="rss" text="Global News BC" title="Global News BC" xmlUrl="https://globalnews.ca/bc/feed/" category="BC Politics" />
+      <outline type="rss" text="Global News BC" title="Global News BC" xmlUrl="https://globalnews.ca/bc/feed/" category="Canada" />
       <outline type="rss" text="The Tyee" title="The Tyee" xmlUrl="https://thetyee.ca/rss2.xml" category="BC Politics" />
       <outline type="rss" text="Times Colonist (Local News)" title="Times Colonist (Local News)" xmlUrl="https://www.timescolonist.com/rss/local-news" category="Local" />
       <outline type="rss" text="Victoria News (Black Press)" title="Victoria News (Black Press)" xmlUrl="https://www.vicnews.com/feed/" category="Local" />

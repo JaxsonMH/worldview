@@ -2,7 +2,7 @@
 
 Checked 2026-10-05 by actually downloading each one
 (`make verify-feeds`; the list itself is `config/worldview/feed-candidates.yaml`).
-**Approved 2026-10-05** (substitutes and extras included). The live list is `config/worldview/feeds.opml`.
+**Approved 2026-10-05** (substitutes and extras included). General news feeds use the broad *Canada* topic; see DECISIONS.md. The live list is `config/worldview/feeds.opml`.
 
 "Paywall" = headlines and summaries come through fine, but opening the full
 article may need a subscription.

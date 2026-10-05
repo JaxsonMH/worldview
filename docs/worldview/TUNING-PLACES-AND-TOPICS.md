@@ -30,9 +30,16 @@ GeoNames ids: search https://www.geonames.org, the number is in the page address
 | What happened | Fix | File |
 |---|---|---|
 | One article | Click **Edit** next to its topics in the Reader | — |
-| A whole feed | Change its default topic in **Manage feeds** (or `category=` in `feeds.opml`). This applies to new articles; existing ones keep theirs. | `feeds.opml` |
+| A whole feed | Change its default topic in **Manage feeds** (or `category=` in `feeds.opml`), then `make reprocess` to re-label its older articles too. | `feeds.opml` |
 | A word should (or shouldn't) trigger a topic | Edit that topic's `keywords` | `topics.yaml` |
+| A keyword fires on the wrong kind of story | Add `only_with_topics` to that topic (see Canadian Politics) | `topics.yaml` |
+| You want a new subject (e.g. Education) | Add a topic with a name, colour and keywords | `topics.yaml` |
 | "Local" area is too big/small | Edit the `within_box` rectangle | `topics.yaml` |
 
 Keywords match whole words, ignoring capitals. One in the headline is enough;
 in the summary it takes two different ones.
+
+**How topics fit together:** each feed gives a broad topic (CTV → Canada,
+BBC → World Politics), and keywords add subjects on top (Crime & Justice,
+Sports, Health…). So a CTV robbery story shows as *Canada* + *Crime & Justice*,
+and clicking either topic in the sidebar finds it.
