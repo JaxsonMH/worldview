@@ -199,7 +199,7 @@ alerts, data retention (e.g. prune articles > 90 days unless starred).
 
 ## 14. Maintainability & documentation (required)
 
-- `docs/` folder written for a non-developer:
+- `docs/worldview/` folder written for a non-developer (kept apart from GEV's own `docs/`):
   - `HOW-IT-WORKS.md` — plain-English tour of every piece.
   - `RUNNING.md` — start/stop/update, common fixes.
   - `ADDING-A-FEED.md`, `ADDING-A-LAYER.md` — step-by-step recipes.
@@ -222,5 +222,20 @@ Present this list to the owner for approval before importing.
 ## 16. Open items
 
 - Mac chip + RAM (decides whether optional local LLM is viable).
-- Owner to approve starter feed list.
+- Owner to approve starter feed list (`docs/worldview/STARTER-FEEDS.md`).
 - Owner to sign up for free keys when a layer needs one (walk them through it).
+- Arc-based feeds (CTV, CP24, BNN Bloomberg) mislabel times by ~4 h; add per-feed time correction.
+
+## 17. Progress (keep updated)
+
+Code layout: `news/` (Python news service), `config/worldview/` (feeds, topics),
+`docs/worldview/`, `scripts/worldview/`, `start.sh`, `Makefile`. Everything else is upstream GEV.
+
+- **Phase 0:** ✔ repo is the GEV fork ✔ GEV boots keyless on Node 24 (`npm run doctor`)
+  ✔ `scripts/worldview/setup-mac.sh` + `docs/worldview/SETUP-MAC.md` written
+  ☐ owner runs setup on the Mac and confirms the globe renders.
+- **Phase 1:** ✔ SQLite schema ✔ fetcher (scheduled, ETag, dedupe, future-date clamp, GeoRSS)
+  ✔ shared filter object + saved-search CRUD API ✔ tests (`make test`)
+  ✔ starter feeds verified — awaiting approval
+  ☐ write approved list to `feeds.opml` + import ☐ ISW JSON reader ☐ geoparser (spaCy + GeoNames + Nominatim)
+  ☐ rule-based topic tagger ☐ reader UI tab + `/api/news` proxy in Vite ☐ 50-article geo spot-check.

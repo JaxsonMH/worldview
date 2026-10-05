@@ -1,0 +1,30 @@
+# Topic list for Worldview (CLAUDE.md section 8). Edit freely:
+#   name     what appears in the app
+#   color    pin / badge colour on the globe and in the reader
+#   keywords optional words that suggest this topic (used by the rule tagger)
+topics:
+  - name: Local
+    description: Greater Victoria / Vancouver Island
+    color: "#2a9d8f"
+  - name: BC Politics
+    color: "#1d6fa5"
+    keywords: [legislature, MLA, premier Eby, BC NDP, BC Conservatives, BC Greens, Elections BC]
+  - name: Canadian Politics
+    color: "#c0392b"
+    keywords: [Parliament, House of Commons, MP, prime minister, Senate, Elections Canada]
+  - name: US Politics
+    color: "#6c5ce7"
+    keywords: [Congress, Senate, White House, Supreme Court, governor]
+  - name: World Politics
+    color: "#8e7dbe"
+  - name: Business & Markets
+    color: "#e09f3e"
+    keywords: [stocks, TSX, earnings, interest rate, Bank of Canada, inflation]
+  - name: Technology
+    color: "#3a86ff"
+  - name: Conflict & Military
+    color: "#9d0208"
+    keywords: [missile, drone strike, troops, ceasefire, airstrike, offensive]
+  - name: Disasters & Environment
+    color: "#f77f00"
+    keywords: [wildfire, earthquake, flood, evacuation, tsunami, atmospheric river, drought]

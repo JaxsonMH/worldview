@@ -1,0 +1,53 @@
+# Proposed starter feeds (CLAUDE.md section 15) — AWAITING OWNER APPROVAL.
+# Every URL below was checked on 2026-10-05 with
+#   cd news && uv run python -m worldview_news.verify_feeds
+# Nothing here is imported until the owner approves; the approved set will be
+# written to feeds.opml.
+#
+# status: ok         = loads, is a real feed, has items from the last few days
+#         substitute = the outlet asked for has no working feed; this is a stand-in
+#         extra      = not in the original brief, suggested to fill a gap
+#         adapter    = no RSS, but the site has a public JSON list we could read
+#         none       = no usable feed found
+
+- {name: Times Colonist (Local News), folder: Local, topic: Local, status: ok, url: "https://www.timescolonist.com/rss/local-news"}
+- {name: CHEK News, folder: Local, topic: Local, status: ok, url: "https://www.cheknews.ca/feed/"}
+- {name: Victoria News (Black Press), folder: Local, topic: Local, status: ok, url: "https://www.vicnews.com/feed/"}
+- {name: CBC British Columbia, folder: Local, topic: Local, status: ok, url: "https://www.cbc.ca/webfeed/rss/rss-canada-britishcolumbia"}
+- {name: Capital Daily, folder: Local, topic: Local, status: ok, url: "https://www.capitaldaily.ca/news/rss.xml"}
+- {name: Global News BC, folder: Local, topic: BC Politics, status: extra, url: "https://globalnews.ca/bc/feed/"}
+- {name: The Tyee, folder: Local, topic: BC Politics, status: extra, url: "https://thetyee.ca/rss2.xml"}
+
+- {name: CBC News (Top Stories), folder: Canada, topic: Canadian Politics, status: ok, url: "https://www.cbc.ca/webfeed/rss/rss-topstories"}
+- {name: CBC News (Politics), folder: Canada, topic: Canadian Politics, status: ok, url: "https://www.cbc.ca/webfeed/rss/rss-politics"}
+- {name: CTV News, folder: Canada, topic: Canadian Politics, status: ok, url: "https://www.ctvnews.ca/arc/outboundfeeds/rss/?outputType=xml"}
+- {name: Globe and Mail (Canada), folder: Canada, topic: Canadian Politics, status: ok, url: "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/canada/"}
+- {name: Globe and Mail (Politics), folder: Canada, topic: Canadian Politics, status: ok, url: "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/politics/"}
+- {name: National Post (Canada), folder: Canada, topic: Canadian Politics, status: ok, url: "https://nationalpost.com/category/news/canada/feed"}
+- {name: The Canadian Press, folder: Canada, topic: Canadian Politics, status: ok, url: "https://www.thecanadianpressnews.ca/search/?f=rss&t=article&l=50&s=start_time&sd=desc"}
+- {name: iPolitics, folder: Canada, topic: Canadian Politics, status: ok, url: "https://www.ipolitics.ca/feed/"}
+
+- {name: Reuters, folder: World, topic: World Politics, status: none, note: "Reuters shut down its public RSS feeds in 2020; every known URL returns 404."}
+- {name: AP News, folder: World, topic: World Politics, status: none, note: "AP has no official RSS; apnews.com blocks feed requests (HTTP 403)."}
+- {name: DW (Deutsche Welle) World, folder: World, topic: World Politics, status: substitute, url: "https://rss.dw.com/rdf/rss-en-world"}
+- {name: France 24, folder: World, topic: World Politics, status: substitute, url: "https://www.france24.com/en/rss"}
+- {name: CBC World, folder: World, topic: World Politics, status: substitute, url: "https://www.cbc.ca/webfeed/rss/rss-world"}
+- {name: BBC World, folder: World, topic: World Politics, status: ok, url: "https://feeds.bbci.co.uk/news/world/rss.xml"}
+- {name: Al Jazeera, folder: World, topic: World Politics, status: ok, url: "https://www.aljazeera.com/xml/rss/all.xml"}
+- {name: The Guardian World, folder: World, topic: World Politics, status: ok, url: "https://www.theguardian.com/world/rss"}
+- {name: NPR World, folder: World, topic: World Politics, status: ok, url: "https://feeds.npr.org/1004/rss.xml"}
+- {name: NPR Politics, folder: World, topic: US Politics, status: extra, url: "https://feeds.npr.org/1014/rss.xml"}
+
+- {name: Financial Post, folder: Business, topic: Business & Markets, status: ok, url: "https://financialpost.com/feed/"}
+- {name: BNN Bloomberg, folder: Business, topic: Business & Markets, status: ok, url: "https://www.bnnbloomberg.ca/arc/outboundfeeds/rss/?outputType=xml"}
+- {name: CNBC Top News, folder: Business, topic: Business & Markets, status: ok, url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114", note: "CNBC's public feed address (cnbc.com/id/.../rss.html) now returns 403; this is the server it points to."}
+
+- {name: Ars Technica, folder: Tech, topic: Technology, status: ok, url: "https://feeds.arstechnica.com/arstechnica/index"}
+- {name: The Verge, folder: Tech, topic: Technology, status: ok, url: "https://www.theverge.com/rss/index.xml"}
+- {name: Hacker News (front page), folder: Tech, topic: Technology, status: ok, url: "https://news.ycombinator.com/rss"}
+
+- {name: Institute for the Study of War, folder: Conflict & OSINT, topic: Conflict & Military, status: adapter, url: "https://understandingwar.org/wp-json/wp/v2/posts", note: "Site redesign turned off RSS (/feed/ redirects to the homepage). Its public WordPress JSON list works; needs a ~30-line reader."}
+- {name: Bellingcat, folder: Conflict & OSINT, topic: Conflict & Military, status: ok, url: "https://www.bellingcat.com/feed/"}
+- {name: War on the Rocks, folder: Conflict & OSINT, topic: Conflict & Military, status: ok, url: "https://warontherocks.com/feed/"}
+- {name: Defense News, folder: Conflict & OSINT, topic: Conflict & Military, status: ok, url: "https://www.defensenews.com/arc/outboundfeeds/rss/?outputType=xml"}
+- {name: The War Zone, folder: Conflict & OSINT, topic: Conflict & Military, status: ok, url: "https://www.twz.com/feed"}
