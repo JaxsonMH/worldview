@@ -6,7 +6,8 @@
 #            different ones. Whole words only, capitals ignored.
 #   only_with_topics  optional: the keywords only count if the article already
 #            has one of these topics (so "election" in a BBC story about
-#            Pakistan isn't tagged Canadian Politics).
+#            Pakistan is World Politics, not Canadian Politics).
+#   Short all-caps keywords (UN, EU, MP, NHL) only match when written in capitals.
 #
 # An article can have several topics: a CTV robbery story is "Canada" (from
 # its feed) plus "Crime & Justice" (from its keywords). After editing, run
@@ -30,9 +31,19 @@ topics:
     only_with_topics: [Canada, Local, BC Politics]
   - name: US Politics
     color: "#6c5ce7"
-    keywords: [Congress, Senate, White House, Supreme Court, governor]
+    # "Senate" and "Supreme Court" alone also mean Canada's, so only the U.S. forms count.
+    keywords: [Congress, U.S. Senate, US Senate, White House, U.S. Supreme Court, US Supreme Court,
+      Republican, Republicans, Democrats, Democratic Party, GOP, Trump administration, midterms]
+  - name: World
+    description: General international news (the default for world news feeds)
+    color: "#4d908e"
   - name: World Politics
     color: "#8e7dbe"
+    keywords: [election, elections, president, prime minister, parliament, government, minister,
+      coalition, opposition, referendum, sanctions, diplomat, diplomats, diplomatic, summit,
+      United Nations, UN, NATO, European Union, EU, protest, protests, protesters, coup,
+      foreign minister, regime, ceasefire talks, peace talks, Kremlin, Netanyahu, Putin, Zelensky, Xi]
+    only_with_topics: [World]
   - name: Business & Markets
     color: "#e09f3e"
     keywords: [stocks, TSX, earnings, interest rate, Bank of Canada, inflation]
@@ -40,14 +51,15 @@ topics:
     color: "#3a86ff"
   - name: Conflict & Military
     color: "#9d0208"
-    keywords: [missile, drone strike, troops, ceasefire, airstrike, offensive]
+    keywords: [missile, missiles, drone strike, drones, troops, ceasefire, airstrike, airstrikes, offensive,
+      military, army, navy, air force, invasion, shelling, war crimes]
   - name: Disasters & Environment
     color: "#f77f00"
-    keywords: [wildfire, wildfires, earthquake, flood, flooding, evacuation, evacuation order, tsunami,
+    keywords: [wildfire, wildfires, earthquake, flood, floods, flooding, evacuation, evacuation order, tsunami,
       atmospheric river, drought, heat dome, hurricane, tornado, climate change, old-growth]
   - name: Crime & Justice
     color: "#5c4d7d"
-    keywords: [police, RCMP, OPP, arrested, arrest, charged, murder, homicide, manslaughter,
+    keywords: [police, RCMP, OPP, FBI, arrested, arrest, arrests, charged, murder, homicide, manslaughter,
       assault, sexual assault, stabbing, shooting, robbery, theft, stolen, fraud, extortion,
       trial, sentenced, convicted, acquitted, jury, prosecutors, Crown, inmate, prison, impounded]
   - name: Sports
@@ -55,12 +67,13 @@ topics:
     keywords: [NHL, NBA, NFL, MLB, MLS, CFL, WNBA, PWHL, Canucks, Oilers, Flames, Maple Leafs, Canadiens,
       Senators, Jets, Kraken, Raptors, Blue Jays, Whitecaps, BC Lions, Stanley Cup, Grey Cup, World Cup,
       Olympic, Olympics, Olympian, Paralympic, hockey, soccer, basketball, baseball, football, curling,
-      tennis, golf, goaltender, quarterback, playoffs, marathon, Ovechkin, McDavid]
+      tennis, golf, goaltender, quarterback, playoffs, marathon, Ovechkin, McDavid, Premier League,
+      Champions League, FIFA, Wimbledon, Grand Slam, China Open, Formula 1, F1, cricket, rugby, boxing, UFC]
   - name: Health
     color: "#d1495b"
     keywords: [hospital, hospitals, health care, health-care, emergency room, ER closures, doctors, nurses,
       measles, mpox, vaccine, vaccines, outbreak, pandemic, cancer, overdose, toxic drug, opioid,
-      mental health, long-term care, public health]
+      mental health, long-term care, public health, plague, disease, WHO]
   - name: Arts & Culture
     color: "#c77dff"
     keywords: [film, films, movie, festival, concert, album, musician, singer, theatre, theater,

@@ -27,15 +27,15 @@
 - {name: The Canadian Press, folder: Canada, topic: Canada, status: ok, url: "https://www.thecanadianpressnews.ca/search/?f=rss&t=article&l=50&s=start_time&sd=desc"}
 - {name: iPolitics, folder: Canada, topic: Canadian Politics, status: ok, url: "https://www.ipolitics.ca/feed/"}
 
-- {name: Reuters, folder: World, topic: World Politics, status: none, note: "Reuters shut down its public RSS feeds in 2020; every known URL returns 404."}
-- {name: AP News, folder: World, topic: World Politics, status: none, note: "AP has no official RSS; apnews.com blocks feed requests (HTTP 403)."}
-- {name: DW (Deutsche Welle) World, folder: World, topic: World Politics, status: substitute, url: "https://rss.dw.com/rdf/rss-en-world"}
-- {name: France 24, folder: World, topic: World Politics, status: substitute, url: "https://www.france24.com/en/rss"}
-- {name: CBC World, folder: World, topic: World Politics, status: substitute, url: "https://www.cbc.ca/webfeed/rss/rss-world"}
-- {name: BBC World, folder: World, topic: World Politics, status: ok, url: "https://feeds.bbci.co.uk/news/world/rss.xml"}
-- {name: Al Jazeera, folder: World, topic: World Politics, status: ok, url: "https://www.aljazeera.com/xml/rss/all.xml"}
-- {name: The Guardian World, folder: World, topic: World Politics, status: ok, url: "https://www.theguardian.com/world/rss"}
-- {name: NPR World, folder: World, topic: World Politics, status: ok, url: "https://feeds.npr.org/1004/rss.xml"}
+- {name: Reuters, folder: World, topic: World, status: none, note: "Reuters shut down its public RSS feeds in 2020; every known URL returns 404."}
+- {name: AP News, folder: World, topic: World, status: none, note: "AP has no official RSS; apnews.com blocks feed requests (HTTP 403)."}
+- {name: DW (Deutsche Welle) World, folder: World, topic: World, status: substitute, url: "https://rss.dw.com/rdf/rss-en-world"}
+- {name: France 24, folder: World, topic: World, status: substitute, url: "https://www.france24.com/en/rss"}
+- {name: CBC World, folder: World, topic: World, status: substitute, url: "https://www.cbc.ca/webfeed/rss/rss-world"}
+- {name: BBC World, folder: World, topic: World, status: ok, url: "https://feeds.bbci.co.uk/news/world/rss.xml"}
+- {name: Al Jazeera, folder: World, topic: World, status: ok, url: "https://www.aljazeera.com/xml/rss/all.xml"}
+- {name: The Guardian World, folder: World, topic: World, status: ok, url: "https://www.theguardian.com/world/rss"}
+- {name: NPR World, folder: World, topic: World, status: ok, url: "https://feeds.npr.org/1004/rss.xml"}
 - {name: NPR Politics, folder: World, topic: US Politics, status: extra, url: "https://feeds.npr.org/1014/rss.xml"}
 
 - {name: Financial Post, folder: Business, topic: Business & Markets, status: ok, url: "https://financialpost.com/feed/"}

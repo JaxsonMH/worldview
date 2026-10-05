@@ -2,6 +2,23 @@
 
 Newest first. Each entry: what we chose, and why.
 
+## 2026-10-05 — World topic
+
+- Same treatment as Canada: new broad **World** topic is the default for Al
+  Jazeera, BBC World, CBC World, DW, France 24, NPR World and The Guardian
+  World. **World Politics** now comes from keywords (election, protests,
+  diplomats, sanctions, NATO, EU, …) and only counts on World articles.
+- **US Politics keywords tightened**: bare "Senate" and "Supreme Court" also
+  mean Canada's, so only "U.S. Senate", "Congress", "White House",
+  "Republicans", etc. count.
+- **Short all-caps keywords must be in capitals** (UN, EU, MP, NHL), so the
+  French "un" isn't World Politics.
+- Added keywords exposed by the review (Premier League, floods, plague,
+  FBI/arrests, military/army/navy). Dropped bare "war" ("trade war").
+- Result on 1,077 live articles: of 153 World-feed stories, 101 now also
+  carry a subject topic (World Politics 57, plus crime, health, sports,
+  conflict); 52 are general "World" news (science, culture, odd stories).
+
 ## 2026-10-05 — Canada topic and subject topics
 
 - Owner asked for a general **Canada** topic, and for crime, sports and other

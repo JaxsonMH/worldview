@@ -40,6 +40,7 @@ Keywords match whole words, ignoring capitals. One in the headline is enough;
 in the summary it takes two different ones.
 
 **How topics fit together:** each feed gives a broad topic (CTV → Canada,
-BBC → World Politics), and keywords add subjects on top (Crime & Justice,
-Sports, Health…). So a CTV robbery story shows as *Canada* + *Crime & Justice*,
+BBC → World), and keywords add subjects on top (Crime & Justice,
+Sports, Health, World Politics…). So a CTV robbery story shows as *Canada* + *Crime & Justice*,
+and a BBC story on Brazil's election as *World* + *World Politics*,
 and clicking either topic in the sidebar finds it.

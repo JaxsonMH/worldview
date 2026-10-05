@@ -32,7 +32,10 @@ def load_topics(path: Path | None = None) -> list[dict]:
 
 @lru_cache(maxsize=256)
 def _keyword_re(word: str) -> re.Pattern:
-    return re.compile(rf"(?<![\w]){re.escape(word)}(?![\w])", re.IGNORECASE)
+    # Short all-caps keywords (UN, EU, MP, NHL) must be written in capitals, so the
+    # French "un" or the word "mp3" don't count; everything else ignores case.
+    flags = 0 if word.isupper() and len(word) <= 4 else re.IGNORECASE
+    return re.compile(rf"(?<![\w]){re.escape(word)}(?![\w])", flags)
 
 
 def keyword_topics(cfg: dict, title: str, summary: str, current: set[str] | None = None) -> set[str]:

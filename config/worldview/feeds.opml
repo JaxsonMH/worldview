@@ -41,14 +41,14 @@
       <outline type="rss" text="The Verge" title="The Verge" xmlUrl="https://www.theverge.com/rss/index.xml" category="Technology" />
     </outline>
     <outline text="World" title="World">
-      <outline type="rss" text="Al Jazeera" title="Al Jazeera" xmlUrl="https://www.aljazeera.com/xml/rss/all.xml" category="World Politics" />
-      <outline type="rss" text="BBC World" title="BBC World" xmlUrl="https://feeds.bbci.co.uk/news/world/rss.xml" category="World Politics" />
-      <outline type="rss" text="CBC World" title="CBC World" xmlUrl="https://www.cbc.ca/webfeed/rss/rss-world" category="World Politics" />
-      <outline type="rss" text="DW (Deutsche Welle) World" title="DW (Deutsche Welle) World" xmlUrl="https://rss.dw.com/rdf/rss-en-world" category="World Politics" />
-      <outline type="rss" text="France 24" title="France 24" xmlUrl="https://www.france24.com/en/rss" category="World Politics" />
+      <outline type="rss" text="Al Jazeera" title="Al Jazeera" xmlUrl="https://www.aljazeera.com/xml/rss/all.xml" category="World" />
+      <outline type="rss" text="BBC World" title="BBC World" xmlUrl="https://feeds.bbci.co.uk/news/world/rss.xml" category="World" />
+      <outline type="rss" text="CBC World" title="CBC World" xmlUrl="https://www.cbc.ca/webfeed/rss/rss-world" category="World" />
+      <outline type="rss" text="DW (Deutsche Welle) World" title="DW (Deutsche Welle) World" xmlUrl="https://rss.dw.com/rdf/rss-en-world" category="World" />
+      <outline type="rss" text="France 24" title="France 24" xmlUrl="https://www.france24.com/en/rss" category="World" />
       <outline type="rss" text="NPR Politics" title="NPR Politics" xmlUrl="https://feeds.npr.org/1014/rss.xml" category="US Politics" />
-      <outline type="rss" text="NPR World" title="NPR World" xmlUrl="https://feeds.npr.org/1004/rss.xml" category="World Politics" />
-      <outline type="rss" text="The Guardian World" title="The Guardian World" xmlUrl="https://www.theguardian.com/world/rss" category="World Politics" />
+      <outline type="rss" text="NPR World" title="NPR World" xmlUrl="https://feeds.npr.org/1004/rss.xml" category="World" />
+      <outline type="rss" text="The Guardian World" title="The Guardian World" xmlUrl="https://www.theguardian.com/world/rss" category="World" />
     </outline>
   </body>
 </opml>

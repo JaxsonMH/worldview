@@ -101,3 +101,18 @@ def test_topic_keywords_can_be_limited_to_other_topics():
                                            "only_with_topics": ["Canada"]}]}
     assert keyword_topics(cfg, "Pakistan election called", "", {"World Politics"}) == set()
     assert keyword_topics(cfg, "Quebec election called", "", {"Canada"}) == {"Canadian Politics"}
+
+
+def test_short_capital_keywords_need_capitals():
+    cfg = {"topics": [{"name": "World Politics", "keywords": ["UN"]}]}
+    assert keyword_topics(cfg, "UN votes on resolution", "") == {"World Politics"}
+    assert keyword_topics(cfg, "Un café pour tous", "") == set()
+
+
+def test_world_feed_story_gets_world_politics_only_with_world_topic():
+    from worldview_news.topics import load_config
+
+    cfg = load_config()
+    assert "World Politics" in keyword_topics(cfg, "Pakistan election called", "", {"World"})
+    assert "World Politics" not in keyword_topics(cfg, "Quebec election called", "", {"Canada"})
+    assert "US Politics" not in keyword_topics(cfg, "Senate committee studies bill", "", {"Canada"})

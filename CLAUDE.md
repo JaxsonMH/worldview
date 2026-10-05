@@ -119,10 +119,10 @@ works without it. Depends on the Mac's RAM.
 
 Taxonomy (editable in `config/worldview/topics.yaml`, not hard-coded):
 Local (Greater Victoria / Vancouver Island) · Canada (general Canadian news) · BC Politics ·
-Canadian Politics · US Politics · World Politics · Business & Markets · Technology ·
+Canadian Politics · US Politics · World (general international news) · World Politics · Business & Markets · Technology ·
 Conflict & Military · Disasters & Environment · Crime & Justice · Sports · Health · Arts & Culture.
 
-Articles can carry several topics. Feeds give a *broad* default (e.g. CTV → Canada);
+Articles can carry several topics. Feeds give a *broad* default (CTV → Canada, BBC → World);
 subject topics (crime, sports, health, politics…) come from keyword rules on top,
 so "Canada + Crime & Justice" is normal. Politics topics are never a feed default
 for general news feeds.
