@@ -2,6 +2,57 @@
 
 Newest first. Each entry: what we chose, and why.
 
+## 2026-10-05 — Geoparser, topics, Reader
+
+- **Place list = GeoNames `cities1000` (towns of 1,000+ people worldwide) +
+  all provinces/states/countries + BC's small places and features**, stored
+  offline in `news/data/gazetteer.sqlite3` (22 MB, built in ~10 s). The full
+  `allCountries` file (400 MB) wasn't worth it.
+- **Three ways of spotting names, not one.** spaCy alone missed Saanich,
+  Sooke, Kamloops and "WASHINGTON (AP)", and labelled the same word
+  differently in different sentences. Adding datelines and direct
+  place-list matching fixed that; the list matching is limited to nicknames,
+  countries/provinces, home-region towns and big cities, so ordinary words
+  don't become places.
+- **spaCy small model (`en_core_web_sm`).** The medium model was no better on
+  our misses (both mislabel local names); small is faster and lighter.
+  Switchable in `geoparser.yaml`.
+- **Confidence comes from "how clear-cut" + "does the article back it up".**
+  A place never counts as evidence for itself (a bug that put "West Coast"
+  in New Zealand). Million-plus cities beat provinces of the same name
+  (Moscow, Madrid); otherwise a named province beats a same-named town
+  (Ontario, not Ontario, California).
+- **People aren't places:** a single word that's the surname of a full
+  person name in the story, or is followed by "says/said/…", is skipped.
+  Names containing an acronym ("Nanaimo RCMP") aren't treated as people.
+- **Spot-check (Phase 1 target ≥ 80% correct city-level pins).** Three
+  samples of 50 Local + Canada articles, checked by hand against title and
+  summary. Samples 1–2 were used to find and fix problems. **Sample 3 was
+  unseen when scored: 24 of 25 articles naming a town got the right pin
+  (96%), with 2 wrong extra pins in 50 articles.** Both wrong pins and the
+  one miss were then fixed by general rules (not article-specific hacks)
+  and re-checked against all three samples. Re-run any time: `make spot-check`.
+  Caveat: graded by Claude, not the owner; worth an owner spot-check.
+- **Nominatim is only asked about streets/venues inside a city already found**
+  (25 km box), 1 request/second, every answer cached in the database.
+- **BC Politics place rule also needs a political keyword.** General news
+  feeds (CTV, CBC Top Stories, Globe Canada, CP) default to "Canadian
+  Politics", so "Canadian Politics + all places in BC" was tagging BC crime
+  and business stories as BC Politics.
+- **Reader is its own page (`/reader.html`)** next to the globe, not inside
+  GEV's `index.html`, so upstream GEV changes stay easy to merge. A "Reader /
+  Globe" tab bar links them. It's plain JavaScript (no framework), like GEV.
+- **`/api/news` reaches the news service through a small forwarder** in the
+  globe app's dev server (`server/worldview/newsProxy.js`), because GEV's
+  security policy only lets the page talk to its own server. This was the
+  one upstream file we edited (`server/standalone/vite.config.js`, +2 lines),
+  plus the upstream test that checks that plugin order.
+- **One kind of location filter at a time** in the Reader: choosing "Near…"
+  clears country/province/city and vice versa (combining them was a common
+  way to get zero results).
+- **Feed changes made in the Reader are written back to `feeds.opml`**, so the
+  file stays the single source of truth.
+
 ## 2026-10-05 — Starter feeds approved
 
 - Owner approved all 34 feeds, including DW / France 24 / CBC World in place of

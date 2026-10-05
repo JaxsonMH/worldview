@@ -1,5 +1,12 @@
 # Adding (or removing) a feed
 
+**Easiest:** in the Reader, click **Manage feeds**, paste the address, pick a
+folder and topic, and press **Add feed**. Worldview checks it's a working feed,
+adds it, fetches it straight away, and saves it to `feeds.opml`. The same page
+turns feeds on/off, imports OPML from another reader, and exports yours.
+
+The rest of this page is the do-it-by-hand way.
+
 Feeds are listed in **`config/worldview/feeds.opml`** — a standard file every
 RSS reader understands, so you can also import/export it from other apps.
 

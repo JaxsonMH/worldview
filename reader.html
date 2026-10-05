@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Worldview · Reader</title>
+  <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+  <link rel="stylesheet" href="/src/worldview/reader/reader.css" />
+</head>
+<body>
+  <header class="wv-top">
+    <a class="wv-brand" href="/reader.html">Worldview</a>
+    <nav class="wv-tabs" aria-label="Views">
+      <a class="wv-tab is-active" href="/reader.html" aria-current="page">Reader</a>
+      <a class="wv-tab" href="/">Globe</a>
+    </nav>
+    <div class="wv-top-right">
+      <span id="status" class="wv-status" role="status"></span>
+      <button id="manage-feeds" class="wv-btn wv-btn-ghost" type="button">Manage feeds</button>
+    </div>
+  </header>
+  <div class="wv-app">
+    <aside id="sidebar" class="wv-sidebar" aria-label="Saved searches, topics and feeds"></aside>
+    <main id="main" class="wv-main"></main>
+  </div>
+  <div id="toast" class="wv-toast" role="alert" hidden></div>
+  <script type="module" src="/src/worldview/reader/main.js"></script>
+</body>
+</html>

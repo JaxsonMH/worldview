@@ -10,5 +10,6 @@ to the upstream God's Eye View project.)
 | [RUNNING.md](RUNNING.md) | starting, stopping, updating, or something's broken |
 | [HOW-IT-WORKS.md](HOW-IT-WORKS.md) | you want a tour of the pieces |
 | [ADDING-A-FEED.md](ADDING-A-FEED.md) | adding or removing a news source |
+| [TUNING-PLACES-AND-TOPICS.md](TUNING-PLACES-AND-TOPICS.md) | a pin or topic is wrong |
 | [STARTER-FEEDS.md](STARTER-FEEDS.md) | reviewing the proposed starter feeds |
 | [DECISIONS.md](DECISIONS.md) | wondering why something was done a certain way |

@@ -40,10 +40,12 @@ CREATE TABLE IF NOT EXISTS articles (
     starred      INTEGER NOT NULL DEFAULT 0,
     content_hash TEXT NOT NULL UNIQUE,
     geo_lat      REAL,
-    geo_lon      REAL
+    geo_lon      REAL,
+    geo_done_at  TEXT
 );
 CREATE INDEX IF NOT EXISTS articles_published ON articles(published_at);
 CREATE INDEX IF NOT EXISTS articles_feed ON articles(feed_id);
+CREATE INDEX IF NOT EXISTS articles_geo_pending ON articles(geo_done_at);
 
 CREATE TABLE IF NOT EXISTS places (
     id           INTEGER PRIMARY KEY,
@@ -74,6 +76,12 @@ CREATE TABLE IF NOT EXISTS article_topics (
     source     TEXT NOT NULL CHECK (source IN ('feed_default','rule','model','manual')),
     confidence REAL NOT NULL DEFAULT 1.0,
     PRIMARY KEY (article_id, topic)
+);
+
+CREATE TABLE IF NOT EXISTS geocode_cache (
+    query      TEXT PRIMARY KEY,
+    result     TEXT,
+    fetched_at TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS saved_searches (
@@ -108,6 +116,14 @@ def connect(path: Path | str) -> sqlite3.Connection:
     return conn
 
 
+# Columns added after the first release; added to older databases on start-up.
+LATER_COLUMNS = [("articles", "geo_done_at", "TEXT")]
+
+
 def init_db(conn: sqlite3.Connection) -> None:
+    for table, column, kind in LATER_COLUMNS:
+        cols = {r[1] for r in conn.execute(f"PRAGMA table_info({table})")}
+        if cols and column not in cols:
+            conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {kind}")
     conn.executescript(SCHEMA)
     conn.commit()

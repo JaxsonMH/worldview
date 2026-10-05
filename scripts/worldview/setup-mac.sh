@@ -31,8 +31,8 @@ uv python install 3.12
 say "5/6 Globe app packages"
 npm ci --no-audit --no-fund
 
-say "6/6 News service packages"
-(cd news && uv sync)
+say "6/6 News service packages + place list"
+(cd news && uv sync && uv run python -m worldview_news gazetteer)
 
 say "Done. Start everything with:  ./start.sh"
 if ! grep -q 'node@24' "$HOME/.zprofile" 2>/dev/null; then

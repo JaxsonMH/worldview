@@ -15,15 +15,18 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
 from apscheduler.schedulers.background import BackgroundScheduler
-from fastapi import FastAPI, HTTPException, Response
+from fastapi import FastAPI, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 
 from . import config
 from .db import connect, init_db
-from .fetcher import fetch_all, iso
-from .filters import ArticleFilter, select_articles
-from .opml import export_opml, import_feeds, read_opml
-from .topics import load_topics
+from .feedcheck import check_feed, make_client
+from .fetcher import fetch_all, fetch_feed, iso
+from .filters import ArticleFilter, build_query, select_articles
+from .gazetteer import GAZETTEER_PATH, normalize
+from .opml import export_opml, import_feeds, read_opml, read_opml_text
+from .geoparser import geoparse_pending
+from .topics import load_topics, set_manual_topics
 
 log = logging.getLogger(__name__)
 
@@ -39,27 +42,50 @@ class ArticlePatch(BaseModel):
     starred: bool | None = None
 
 
+class TopicsIn(BaseModel):
+    topics: list[str]
+
+
 class FeedPatch(BaseModel):
     enabled: bool | None = None
     folder: str | None = None
     default_topic: str | None = None
+    title: str | None = None
 
 
-def create_app(db_path=None, start_scheduler: bool = True, import_opml: bool = True) -> FastAPI:
+class FeedIn(BaseModel):
+    url: str = Field(min_length=8)
+    title: str | None = None
+    folder: str = "Other"
+    default_topic: str | None = None
+
+
+def create_app(db_path=None, start_scheduler: bool = True, import_opml: bool = True,
+               opml_path=None) -> FastAPI:
+    opml_path = opml_path or config.FEEDS_OPML
     conn = connect(db_path or config.DB_PATH)
     init_db(conn)
-    if import_opml and config.FEEDS_OPML.exists():
+    if import_opml and opml_path.exists():
         # feeds.opml is the source of truth: re-reading it on every start picks up edits.
-        added, updated = import_feeds(conn, read_opml(config.FEEDS_OPML))
+        added, updated = import_feeds(conn, read_opml(opml_path))
         log.info("feeds.opml: %d added, %d updated", added, updated)
     lock = threading.Lock()  # one writer at a time (fetcher vs. API clicks)
     scheduler = BackgroundScheduler()
 
     def run_fetch() -> dict:
+        """Fetch every feed, then find places and topics for the new articles."""
         fetch_conn = connect(db_path or config.DB_PATH)
         try:
             with lock:
-                return fetch_all(fetch_conn)
+                new = fetch_all(fetch_conn)
+            while True:
+                with lock:  # in small batches, so clicks in the app aren't held up
+                    if not geoparse_pending(fetch_conn, limit=50):
+                        break
+            return new
+        except FileNotFoundError as exc:  # gazetteer not built yet
+            log.warning("%s", exc)
+            return new
         finally:
             fetch_conn.close()
 
@@ -107,6 +133,19 @@ def create_app(db_path=None, start_scheduler: bool = True, import_opml: bool = T
                 raise HTTPException(404, "No such article")
         return get_article(article_id)
 
+    @app.put("/api/news/articles/{article_id}/topics")
+    def put_topics(article_id: int, body: TopicsIn):
+        """Re-tag an article by hand; automatic tagging leaves it alone afterwards."""
+        known = {t["name"] for t in load_topics(config.TOPICS_YAML)}
+        unknown = set(body.topics) - known
+        if unknown:
+            raise HTTPException(422, f"Unknown topic(s): {', '.join(sorted(unknown))}")
+        get_article(article_id)
+        with lock:
+            set_manual_topics(conn, article_id, body.topics)
+            conn.commit()
+        return {"topics": body.topics}
+
     @app.get("/api/news/feeds")
     def list_feeds():
         rows = conn.execute(
@@ -115,6 +154,11 @@ def create_app(db_path=None, start_scheduler: bool = True, import_opml: bool = T
                FROM feeds f LEFT JOIN articles a ON a.feed_id = f.id GROUP BY f.id ORDER BY f.folder, f.title"""
         ).fetchall()
         return [dict(r) | {"enabled": bool(r["enabled"])} for r in rows]
+
+    def save_opml() -> None:
+        """Changes made in the app are written back to feeds.opml, so it stays the source of truth."""
+        opml_path.parent.mkdir(parents=True, exist_ok=True)
+        opml_path.write_text(export_opml(conn))
 
     @app.patch("/api/news/feeds/{feed_id}")
     def patch_feed(feed_id: int, patch: FeedPatch):
@@ -126,14 +170,132 @@ def create_app(db_path=None, start_scheduler: bool = True, import_opml: bool = T
                 sets = ", ".join(f"{k} = ?" for k in changes)
                 conn.execute(f"UPDATE feeds SET {sets} WHERE id = ?", [*changes.values(), feed_id])
                 conn.commit()
+                save_opml()
         feed = next((f for f in list_feeds() if f["id"] == feed_id), None)
         if not feed:
             raise HTTPException(404, "No such feed")
         return feed
 
+    @app.post("/api/news/feeds", status_code=201)
+    def add_feed(body: FeedIn):
+        """Check the URL really is a working feed, then add it and fetch it once."""
+        if conn.execute("SELECT 1 FROM feeds WHERE url = ?", (body.url,)).fetchone():
+            raise HTTPException(409, "That feed is already in your list")
+        with make_client() as client:
+            check = check_feed(body.url, client)
+            if not check.ok:
+                raise HTTPException(422, f"That address isn't a working feed: {check.problem}")
+            with lock:
+                import_feeds(conn, [{"url": body.url, "title": body.title or check.title or body.url,
+                                     "folder": body.folder, "default_topic": body.default_topic, "enabled": True}])
+                save_opml()
+                feed = conn.execute("SELECT * FROM feeds WHERE url = ?", (body.url,)).fetchone()
+                fetch_feed(conn, feed, client)
+        return next(f for f in list_feeds() if f["url"] == body.url)
+
+    @app.post("/api/news/feeds/import")
+    async def import_opml_upload(request: Request):
+        """Body: the text of an OPML file (e.g. exported from another reader)."""
+        try:
+            feeds = read_opml_text((await request.body()).decode("utf-8", "replace"))
+        except Exception:
+            raise HTTPException(422, "That file isn't valid OPML")
+        with lock:
+            added, updated = import_feeds(conn, feeds)
+            save_opml()
+        return {"added": added, "updated": updated}
+
     @app.get("/api/news/feeds.opml")
     def feeds_opml():
         return Response(export_opml(conn), media_type="text/x-opml")
+
+    @app.post("/api/news/articles/mark-read")
+    def mark_read(flt: ArticleFilter):
+        """Mark every article matching the filter as read."""
+        base, params = build_query(flt)
+        with lock:
+            cur = conn.execute(f"UPDATE articles SET read = 1 WHERE id IN (SELECT a.id {base})", params)
+            conn.commit()
+        return {"marked": cur.rowcount}
+
+    def gazetteer() -> sqlite3.Connection | None:
+        if not GAZETTEER_PATH.exists():
+            return None
+        gz = sqlite3.connect(f"file:{GAZETTEER_PATH}?mode=ro", uri=True)
+        gz.row_factory = sqlite3.Row
+        return gz
+
+    @app.get("/api/news/facets")
+    def facets():
+        """Counts for the sidebar and the location pickers."""
+        folders = conn.execute(
+            """SELECT f.folder, count(a.id) total, sum(a.read = 0) unread FROM feeds f
+               LEFT JOIN articles a ON a.feed_id = f.id WHERE f.enabled = 1 GROUP BY f.folder ORDER BY f.folder""").fetchall()
+        feeds = conn.execute(
+            """SELECT f.id, f.title, f.folder, f.error_count, count(a.id) total, sum(a.read = 0) unread FROM feeds f
+               LEFT JOIN articles a ON a.feed_id = f.id WHERE f.enabled = 1 GROUP BY f.id ORDER BY f.title""").fetchall()
+        topics = conn.execute(
+            """SELECT t.topic, count(*) total, sum(a.read = 0) unread FROM article_topics t
+               JOIN articles a ON a.id = t.article_id GROUP BY t.topic""").fetchall()
+        places = conn.execute(
+            """SELECT p.country_code, p.admin1, p.name, p.precision, count(DISTINCT ap.article_id) n
+               FROM article_places ap JOIN places p ON p.id = ap.place_id
+               WHERE ap.confidence >= 0.6 AND p.country_code IS NOT NULL GROUP BY p.id""").fetchall()
+        countries: dict[str, int] = {}
+        regions: dict[tuple, int] = {}
+        cities: dict[tuple, int] = {}
+        for p in places:
+            countries[p["country_code"]] = countries.get(p["country_code"], 0) + p["n"]
+            if p["admin1"]:
+                key = (p["country_code"], p["admin1"])
+                regions[key] = regions.get(key, 0) + p["n"]
+            if p["precision"] == "city":
+                key = (p["country_code"], p["admin1"], p["name"])
+                cities[key] = cities.get(key, 0) + p["n"]
+        names: dict = {}
+        gz = gazetteer()
+        if gz:
+            for r in gz.execute("SELECT kind, country_code, admin1, name FROM gz_places WHERE kind IN ('country','region')"):
+                names[(r["country_code"],) if r["kind"] == "country" else (r["country_code"], r["admin1"])] = r["name"]
+            gz.close()
+        return {
+            "folders": [dict(r) | {"unread": r["unread"] or 0} for r in folders],
+            "feeds": [dict(r) | {"unread": r["unread"] or 0} for r in feeds],
+            "topics": [dict(r) | {"unread": r["unread"] or 0} for r in topics],
+            "countries": sorted(({"code": k, "name": names.get((k,), k), "count": v} for k, v in countries.items()),
+                                key=lambda x: -x["count"]),
+            "regions": sorted(({"country": k[0], "admin1": k[1], "name": names.get(k, k[1]), "count": v}
+                               for k, v in regions.items()), key=lambda x: -x["count"]),
+            "cities": sorted(({"country": k[0], "admin1": k[1], "name": k[2], "count": v} for k, v in cities.items()),
+                             key=lambda x: -x["count"]),
+        }
+
+    def home_country() -> str:
+        """The owner's home country (the Local folder's home region in geoparser.yaml)."""
+        from .geoparser import load_settings
+
+        homes = load_settings().get("home_regions") or {}
+        return (homes.get("Local") or {}).get("country", "")
+
+    @app.get("/api/news/places/search")
+    def place_search(q: str, limit: int = 8):
+        """Look up a place by name (for "within X km of ..."), biggest first."""
+        key = normalize(q)
+        gz = gazetteer()
+        if not gz or len(key) < 2:
+            return []
+        try:
+            rows = gz.execute(
+                """SELECT DISTINCT p.geonames_id, p.name, p.kind, p.country_code, p.admin1, p.lat, p.lon, p.population,
+                          (SELECT r.name FROM gz_places r WHERE r.kind = 'region' AND r.country_code = p.country_code
+                             AND r.admin1 = p.admin1) AS region
+                   FROM gz_names n JOIN gz_places p USING (geonames_id)
+                   WHERE n.name >= ? AND n.name < ? AND n.is_primary = 1
+                   ORDER BY p.country_code = ? DESC, p.population DESC LIMIT ?""",
+                (key, key + "\uffff", home_country(), min(limit, 20))).fetchall()
+            return [dict(r) for r in rows]
+        finally:
+            gz.close()
 
     @app.post("/api/news/fetch")
     def fetch_now():

@@ -1,0 +1,40 @@
+# Settings for finding where articles happened (CLAUDE.md section 7).
+# Change these freely; no code changes needed. Restart Worldview afterwards.
+
+# spaCy language model used to spot place names. en_core_web_sm is small/fast;
+# en_core_web_md is larger. Both are installed.
+spacy_model: en_core_web_sm
+
+# Places below this confidence (0–1) are kept in the database but not shown
+# as pins or used by location filters.
+min_confidence: 0.6
+
+# Street / venue lookups via OpenStreetMap Nominatim (max 1 request/second,
+# results cached). Set to false if street-level pins prove unreliable.
+street_level: true
+
+# Where each feed folder's stories usually happen. Used to break ties, e.g.
+# "Victoria" in a Local story means Victoria BC, not Victoria Australia.
+# country = 2-letter code; admin1 = GeoNames province/state code (BC is "02").
+home_regions:
+  Local: {country: CA, admin1: "02"}
+  Canada: {country: CA}
+  Business: {}
+  World: {}
+  Tech: {}
+  Conflict & OSINT: {}
+
+# Place names that are also everyday words. The name-matching step ignores
+# these (spaCy can still find them when the sentence makes it clear).
+ignore_words: [Hope, Golden, Mission, Terrace, Union, Beaver, Eagle, Premier, Liberal,
+  Reform, Green, Royal, Central, North, South, East, West, Fort, Port, Bay, Lake,
+  Island, Mount, Harbour, Beach, Park, Hwy, Highway, Street, Avenue, Road,
+  January, February, March, April, May, June, July, August, September, October,
+  November, December, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday,
+  Canadian, American, British, Indigenous, First, Nations, Crown, Court, Supreme,
+  Parliament, Senate, House, Commons, Police, News, Press, Global]
+
+# Names that are never places in our news, whichever way they're found
+# (usually politicians whose surname is also a town: Carney, Maryland).
+never_places: [Carney, Poilievre, Hegseth, Middle East, Northeast, Northwest, Southeast,
+  Southwest, Midwest, West Coast, East Coast, North East]

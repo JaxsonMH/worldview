@@ -223,14 +223,18 @@ Present this list to the owner for approval before importing.
 
 - Owner's Mac: **MacBook Pro, M3 Pro, 18 GB RAM.** Enough for an optional local LLM
   via Ollama using a small model (~3–8B parameters, 4-bit, ~2–5 GB RAM); keep it optional.
-
 - Owner to sign up for free keys when a layer needs one (walk them through it).
 - Arc-based feeds (CTV, CP24, BNN Bloomberg) mislabel times by ~4 h; add per-feed time correction.
+- General news feeds (CTV, CBC Top Stories, Globe Canada, National Post, CP) default to
+  "Canadian Politics" even for crime/sports stories. Ask owner: add a general "Canada" topic?
+- Owner to do their own geo spot-check (`make spot-check`) once running on the Mac.
 
 ## 17. Progress (keep updated)
 
-Code layout: `news/` (Python news service), `config/worldview/` (feeds, topics),
-`docs/worldview/`, `scripts/worldview/`, `start.sh`, `Makefile`. Everything else is upstream GEV.
+Code layout: `news/` (Python news service), `config/worldview/` (feeds, topics, place settings),
+`src/worldview/` + `reader.html` (Reader), `server/worldview/` (API forwarder), `docs/worldview/`,
+`scripts/worldview/`, `start.sh`, `Makefile`. Everything else is upstream GEV (edited only:
+`server/standalone/vite.config.js` +2 lines, `src/tooling/viteBuild.test.mjs` plugin order).
 
 - **Phase 0:** ✔ repo is the GEV fork ✔ GEV boots keyless on Node 24 (`npm run doctor`)
   ✔ `scripts/worldview/setup-mac.sh` + `docs/worldview/SETUP-MAC.md` written
@@ -238,5 +242,11 @@ Code layout: `news/` (Python news service), `config/worldview/` (feeds, topics),
 - **Phase 1:** ✔ SQLite schema ✔ fetcher (scheduled, ETag, dedupe, future-date clamp, GeoRSS)
   ✔ shared filter object + saved-search CRUD API ✔ tests (`make test`)
   ✔ starter feeds approved (34, incl. substitutes + extras) → `config/worldview/feeds.opml`,
-  auto-imported on every start ✔ ISW read via WordPress JSON (`wordpress.py`) ☐ geoparser (spaCy + GeoNames + Nominatim)
-  ☐ rule-based topic tagger ☐ reader UI tab + `/api/news` proxy in Vite ☐ 50-article geo spot-check.
+  auto-imported on every start ✔ ISW read via WordPress JSON (`wordpress.py`)
+  ✔ geoparser (datelines + spaCy + gazetteer matching, GeoNames, Nominatim) — see `docs/worldview/DECISIONS.md`
+  ✔ rule-based topic tagger (keywords + place rules, manual override)
+  ✔ Reader (`/reader.html`): filters, saved searches, feed management, topic editing
+  ✔ `/api/news` proxy in Vite ✔ geo spot-check: 96% city-level on an unseen sample of 50
+  ☐ owner verification on the Mac. **Phase 1 is otherwise complete.**
+- **Phase 2 next:** My News globe layer, "Show on globe" (button exists, disabled), layer panel,
+  `make health`.

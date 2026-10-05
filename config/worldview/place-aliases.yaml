@@ -1,0 +1,64 @@
+# Nicknames, abbreviations and local landmarks the gazetteer doesn't know.
+# Each alias points either at a GeoNames place (geonames_id) or at a point
+# you define (name + lat/lon). `only_when_home: CA` (or `CA.02` for BC) limits
+# an alias to feeds whose home region matches (see geoparser.yaml). Matching ignores case, accents and full stops,
+# so "B.C." matches "bc". Add your own any time.
+#
+# precision: country | region | city | street | poi
+
+aliases:
+  # Countries
+  - {names: [US, USA, U.S., U.S.A., America, United States of America], geonames_id: 6252001}
+  - {names: [UK, U.K., Britain, Great Britain], geonames_id: 2635167}
+  - {names: [Russia, Russian Federation], geonames_id: 2017370}
+  - {names: [Gaza, Gaza Strip], name: Gaza Strip, precision: region, lat: 31.42, lon: 34.36, country_code: PS}
+  - {names: [West Bank], name: West Bank, precision: region, lat: 31.95, lon: 35.30, country_code: PS}
+
+  # Canadian provinces and territories (common abbreviations). Two-letter postal
+  # codes like ON or AB are left out on purpose: they clash with ordinary words.
+  - {names: [B.C., BC], geonames_id: 5909050}
+  - {names: [Alta.], geonames_id: 5883102}
+  - {names: [Sask.], geonames_id: 6141242}
+  - {names: [Man.], geonames_id: 6065171}
+  - {names: [Ont.], geonames_id: 6093943}
+  - {names: [Que.], geonames_id: 6115047}
+  - {names: [N.B.], geonames_id: 6087430}
+  - {names: [N.S.], geonames_id: 6091530}
+  - {names: [P.E.I., PEI], geonames_id: 6113358}
+  - {names: [N.L., Newfoundland], geonames_id: 6354959}
+  - {names: [N.W.T., NWT], geonames_id: 6091069}
+
+  # Names that usually mean one specific place in the news
+  - {names: [Washington, "Washington, D.C.", D.C., DC], geonames_id: 4140963}
+  - {names: [Ottawa], geonames_id: 6094817}
+  - {names: [New York, NYC, New York City], geonames_id: 5128581}
+  - {names: [Victoria], geonames_id: 6174041, only_when_home: CA}
+
+  # Greater Victoria / Vancouver Island landmarks
+  - {names: [B.C. legislature, BC legislature, B.C. Parliament Buildings], precision: poi, name: B.C. Parliament Buildings, lat: 48.4197, lon: -123.3703, country_code: CA, admin1: "02"}
+  - {names: [the Legislature, legislature], precision: poi, name: B.C. Parliament Buildings, lat: 48.4197, lon: -123.3703, country_code: CA, admin1: "02", only_when_home: CA.02}
+  - {names: [Swartz Bay], precision: poi, name: Swartz Bay ferry terminal, lat: 48.6889, lon: -123.4108, country_code: CA, admin1: "02"}
+  - {names: [Tsawwassen terminal], precision: poi, name: Tsawwassen ferry terminal, lat: 49.0072, lon: -123.1303, country_code: CA, admin1: "02"}
+  - {names: [Departure Bay], precision: poi, name: Departure Bay ferry terminal, lat: 49.1934, lon: -123.9545, country_code: CA, admin1: "02"}
+  - {names: [the Malahat, Malahat], precision: region, name: Malahat, lat: 48.5747, lon: -123.5544, country_code: CA, admin1: "02"}
+  - {names: [West Shore, Westshore], precision: region, name: West Shore, lat: 48.445, lon: -123.505, country_code: CA, admin1: "02"}
+  - {names: [Saanich Peninsula], precision: region, name: Saanich Peninsula, lat: 48.60, lon: -123.42, country_code: CA, admin1: "02"}
+  - {names: [Greater Victoria, Capital Region, CRD], precision: region, name: Greater Victoria, lat: 48.4284, lon: -123.3656, country_code: CA, admin1: "02"}
+  - {names: [Vancouver Island], precision: region, name: Vancouver Island, lat: 49.65, lon: -125.45, country_code: CA, admin1: "02"}
+  - {names: [the Island], precision: region, name: Vancouver Island, lat: 49.65, lon: -125.45, country_code: CA, admin1: "02", only_when_home: CA.02}
+  - {names: [Lower Mainland, Metro Vancouver], precision: region, name: Metro Vancouver, lat: 49.25, lon: -123.0, country_code: CA, admin1: "02"}
+  - {names: [Victoria International Airport, YYJ], precision: poi, name: Victoria International Airport, lat: 48.6469, lon: -123.4258, country_code: CA, admin1: "02"}
+  - {names: [Ogden Point], precision: poi, name: Ogden Point, lat: 48.4135, lon: -123.3855, country_code: CA, admin1: "02"}
+  - {names: [Inner Harbour], precision: poi, name: Victoria Inner Harbour, lat: 48.4222, lon: -123.3700, country_code: CA, admin1: "02", only_when_home: CA.02}
+  - {names: [Parliament Hill], precision: poi, name: Parliament Hill, lat: 45.4236, lon: -75.7009, country_code: CA, admin1: "08"}
+
+  # Institutions that pin a story to a city
+  - {names: [UVic, University of Victoria], precision: poi, name: University of Victoria, lat: 48.4634, lon: -123.3117, country_code: CA, admin1: "02"}
+  - {names: [Camosun College, Camosun], precision: poi, name: Camosun College, lat: 48.4710, lon: -123.3291, country_code: CA, admin1: "02"}
+  - {names: [UBC, University of British Columbia], precision: poi, name: University of British Columbia, lat: 49.2606, lon: -123.2460, country_code: CA, admin1: "02"}
+  - {names: [SFU, Simon Fraser University], precision: poi, name: Simon Fraser University, lat: 49.2781, lon: -122.9199, country_code: CA, admin1: "02"}
+  - {names: [Royal Jubilee Hospital], precision: poi, name: Royal Jubilee Hospital, lat: 48.4330, lon: -123.3270, country_code: CA, admin1: "02"}
+  - {names: [Victoria General Hospital], precision: poi, name: Victoria General Hospital, lat: 48.4664, lon: -123.4320, country_code: CA, admin1: "02"}
+  - {names: [Rideau Hall], precision: poi, name: Rideau Hall, lat: 45.4446, lon: -75.6862, country_code: CA, admin1: "08"}
+  - {names: [Pearson airport, Toronto Pearson, Pearson International Airport], precision: poi, name: Toronto Pearson International Airport, lat: 43.6777, lon: -79.6248, country_code: CA, admin1: "08"}
+  - {names: [Tk’emlúps, Tk̓emlúps, Tkemlups, Tk’emlúps te Secwépemc, Tk̓emlúps te Secwépemc], precision: city, name: Kamloops, geonames_id: 5989045, lat: 50.6665, lon: -120.3192, country_code: CA, admin1: "02"}

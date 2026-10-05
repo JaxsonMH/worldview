@@ -12,6 +12,14 @@ from pathlib import Path
 
 
 def read_opml(path: Path | str) -> list[dict]:
+    return _feeds_from(ET.parse(path).getroot())
+
+
+def read_opml_text(text: str) -> list[dict]:
+    return _feeds_from(ET.fromstring(text))
+
+
+def _feeds_from(root: ET.Element) -> list[dict]:
     feeds = []
 
     def walk(node: ET.Element, folder: str | None) -> None:
@@ -28,7 +36,10 @@ def read_opml(path: Path | str) -> list[dict]:
             else:
                 walk(child, child.get("title") or child.get("text"))
 
-    walk(ET.parse(path).getroot().find("body"), None)
+    body = root.find("body")
+    if body is None:
+        raise ValueError("no <body> in OPML")
+    walk(body, None)
     return feeds
 
 
