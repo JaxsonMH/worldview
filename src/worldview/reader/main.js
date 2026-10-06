@@ -12,6 +12,7 @@ import {
   toQuery,
 } from '../newsFilter.js';
 import { newsApi } from '../newsApi.js';
+import { attempt, fullTime, h, timeAgo, toast } from '../ui.js';
 
 const PAGE = 100;
 const TIME_CHOICES = [
@@ -37,81 +38,7 @@ const state = {
   editingTopics: false,
 };
 
-// ---------- tiny DOM helper ----------
-
-/** h('div.class', {attrs/on...}, ...children) — text children are always escaped.
- *  The props object may be left out: h('span', 'text'). */
-function h(tag, props = {}, ...children) {
-  if (
-    props === null ||
-    typeof props !== 'object' ||
-    Array.isArray(props) ||
-    props instanceof Node
-  ) {
-    children.unshift(props);
-    props = {};
-  }
-  const [name, ...classes] = tag.split('.');
-  const el = document.createElement(name || 'div');
-  if (classes.length) el.className = classes.join(' ');
-  for (const [key, value] of Object.entries(props ?? {})) {
-    if (value === undefined || value === null || value === false) continue;
-    if (key.startsWith('on')) el.addEventListener(key.slice(2), value);
-    else if (key === 'style' && typeof value === 'object')
-      Object.assign(el.style, value);
-    else if (key in el && key !== 'list') el[key] = value;
-    else el.setAttribute(key, value === true ? '' : value);
-  }
-  for (const child of children.flat(Infinity)) {
-    if (child === null || child === undefined || child === false) continue;
-    el.append(
-      child instanceof Node ? child : document.createTextNode(String(child)),
-    );
-  }
-  return el;
-}
-
 const $ = (id) => document.getElementById(id);
-
-function toast(message, kind = 'error') {
-  const box = $('toast');
-  box.textContent = message;
-  box.dataset.kind = kind;
-  box.hidden = false;
-  clearTimeout(toast.timer);
-  toast.timer = setTimeout(() => (box.hidden = true), 5000);
-}
-
-async function attempt(fn) {
-  try {
-    return await fn();
-  } catch (err) {
-    toast(err.message);
-    return undefined;
-  }
-}
-
-// ---------- formatting ----------
-
-function timeAgo(iso) {
-  const seconds = (Date.now() - Date.parse(iso)) / 1000;
-  if (seconds < 90) return 'just now';
-  if (seconds < 3600) return `${Math.round(seconds / 60)}m ago`;
-  if (seconds < 86400) return `${Math.round(seconds / 3600)}h ago`;
-  if (seconds < 2 * 86400) return 'yesterday';
-  if (seconds < 7 * 86400) return `${Math.floor(seconds / 86400)} days ago`;
-  return new Date(iso).toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-}
-
-const fullTime = (iso) =>
-  new Date(iso).toLocaleString(undefined, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  });
 
 function topicColor(name) {
   return state.topics.find((t) => t.name === name)?.color ?? '#888';
@@ -911,11 +838,12 @@ function renderPreview() {
         a.read ? 'Mark unread' : 'Mark read',
       ),
       h(
-        'button.wv-btn.wv-btn-ghost',
+        'a.wv-btn.wv-btn-ghost',
         {
-          type: 'button',
-          disabled: true,
-          title: 'Comes with the globe’s My News layer (Phase 2)',
+          href: `/globe.html${showOnGlobeHash(a)}`,
+          title: a.places.length
+            ? 'Fly to this story on the globe, with your current filters'
+            : 'This story has no location yet',
         },
         'Show on globe',
       ),
@@ -1415,8 +1343,34 @@ document.addEventListener('keydown', (e) => {
 window.addEventListener('hashchange', () => {
   const next = filterFromHash(location.hash);
   if (!sameFilter(next, state.filter)) setFilter(next, { push: false });
+  openLinkedArticle();
 });
 $('manage-feeds').addEventListener('click', openFeeds);
+
+/** Globe link: this article plus the current filters (minus anything that hides it). */
+function showOnGlobeHash(a) {
+  const filter = { ...state.filter };
+  delete filter.read;
+  delete filter.starred;
+  const params = new URLSearchParams(filterToHash(filter).replace(/^#/, ''));
+  params.set('article', a.id);
+  return `#${params}`;
+}
+
+/** "Open in Reader" links from the globe: #article=ID opens that article. */
+async function openLinkedArticle() {
+  const id = Number(
+    new URLSearchParams(location.hash.replace(/^#/, '')).get('article'),
+  );
+  if (!id) return;
+  let a = state.articles.find((x) => x.id === id);
+  if (!a) {
+    a = await attempt(() => newsApi.article(id));
+    if (!a) return;
+    state.articles = [a, ...state.articles];
+  }
+  select(id);
+}
 
 async function start() {
   renderMain();
@@ -1427,6 +1381,7 @@ async function start() {
     loadSaved(),
     refreshStatus(),
   ]);
+  await openLinkedArticle();
   // Keep counts fresh while the page is open.
   setInterval(() => {
     refreshStatus();

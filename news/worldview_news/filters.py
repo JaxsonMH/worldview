@@ -5,6 +5,7 @@ A filter is plain JSON, so it can be saved as a saved search and edited later:
 
     {
       "q": "ferry",                      keyword in title or summary
+      "ids": [12, 40],                   exactly these articles
       "feeds": [3, 7], "folders": ["Local"], "topics": ["BC Politics"],
       "since": "2026-10-01T00:00:00Z", "until": "...", "last_hours": 24,
       "read": false, "starred": true, "has_location": true,
@@ -36,6 +37,7 @@ class ArticleFilter(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     q: str | None = None
+    ids: list[int] | None = None
     feeds: list[int] | None = None
     folders: list[str] | None = None
     topics: list[str] | None = None
@@ -86,6 +88,9 @@ def build_query(flt: ArticleFilter, now: datetime | None = None) -> tuple[str, l
         for word in flt.q.split():
             like = f"%{word}%"
             add("(a.title LIKE ? OR a.summary LIKE ?)", like, like)
+    if flt.ids:
+        clause, vals = _in("a.id", flt.ids)
+        add(clause, *vals)
     if flt.feeds:
         clause, vals = _in("a.feed_id", flt.feeds)
         add(clause, *vals)

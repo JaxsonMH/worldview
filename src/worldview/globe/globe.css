@@ -1,0 +1,79 @@
+/* Worldview Globe. Shares the Reader's colours, top bar and buttons. */
+@import '../reader/reader.css';
+
+body { overflow: hidden; }
+.wv-brand { display: inline-flex; align-items: center; gap: 8px; }
+.wv-stage { position: relative; flex: 1; display: grid; grid-template-columns: 300px 1fr; min-height: 0; }
+.wv-globe { position: relative; min-width: 0; min-height: 0; }
+.wv-globe .cesium-widget, .wv-globe canvas { width: 100%; height: 100%; display: block; }
+
+/* place search in the top bar */
+.wv-place-search { position: relative; flex: 0 1 360px; }
+.wv-place-search input { width: 100%; padding: 6px 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--bg); color: var(--text); }
+.wv-place-search .wv-suggest[hidden] { display: none; }
+.wv-place-search .wv-suggest { position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 30; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 6px 24px rgb(0 0 0 / 0.18); padding: 4px; }
+
+/* layer panel */
+.wv-panel { overflow-y: auto; background: var(--panel); border-right: 1px solid var(--line); padding: 12px 12px 24px; }
+.wv-panel-title { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 2px 4px 10px; }
+.wv-group { border: 1px solid var(--line); border-radius: 10px; margin-bottom: 8px; background: var(--panel); }
+.wv-group > summary { display: flex; justify-content: space-between; align-items: center; padding: 9px 12px; cursor: pointer; font-weight: 600; list-style: none; }
+.wv-group > summary::-webkit-details-marker { display: none; }
+.wv-group > summary::after { content: '▸'; color: var(--muted); margin-left: 8px; transition: transform 0.15s; }
+.wv-group[open] > summary::after { transform: rotate(90deg); }
+.wv-group > summary .wv-count { margin-left: auto; color: var(--accent); font-weight: 500; }
+.wv-layer { display: flex; gap: 10px; align-items: flex-start; padding: 8px 12px; border-top: 1px solid var(--line); cursor: pointer; }
+.wv-layer:hover { background: var(--bg); }
+.wv-layer-text { display: flex; flex-direction: column; min-width: 0; }
+.wv-layer-name { font-weight: 500; }
+.wv-layer-about { font-size: 12.5px; color: var(--muted); }
+.wv-layer-status { font-size: 12px; margin-top: 2px; color: var(--muted); }
+.wv-layer-status.is-warn { color: var(--warn); }
+.wv-layer-status.is-bad { color: var(--bad); }
+
+/* switch */
+.wv-switch { appearance: none; flex: none; width: 34px; height: 20px; margin-top: 2px; border-radius: 999px; background: var(--line); position: relative; cursor: pointer; transition: background 0.15s; }
+.wv-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgb(0 0 0 / 0.3); transition: transform 0.15s; }
+.wv-switch:checked { background: var(--accent); }
+.wv-switch:checked::after { transform: translateX(14px); }
+
+.wv-news-controls { padding: 4px 12px 12px 56px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; font-size: 13px; }
+.wv-news-filter { margin: 0; color: var(--muted); }
+.wv-legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12.5px; color: var(--muted); }
+.wv-legend li { display: inline-flex; align-items: center; gap: 5px; }
+
+.wv-basemap { margin: 14px 4px 0; }
+.wv-basemap h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 0 0 6px; font-weight: 600; }
+.wv-panel-foot { margin: 18px 4px 0; font-size: 12px; color: var(--muted); }
+
+/* info card */
+.wv-card { position: absolute; top: 14px; right: 14px; z-index: 20; width: min(380px, calc(100% - 28px)); max-height: calc(100% - 28px); overflow-y: auto; background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 10px 34px rgb(0 0 0 / 0.25); padding: 16px 18px; }
+.wv-card h2 { font-size: 18px; line-height: 1.3; margin: 0 28px 8px 0; }
+.wv-card h2 a { color: var(--text); text-decoration: none; }
+.wv-card h2 a:hover { text-decoration: underline; }
+.wv-card-close { position: absolute; top: 8px; right: 10px; border: 0; background: none; font-size: 22px; line-height: 1; color: var(--muted); cursor: pointer; }
+.wv-card-kicker { font-size: 13px; color: var(--muted); margin: 0 0 6px; }
+.wv-card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; }
+.wv-card-places { font-size: 13.5px; margin: 8px 0; }
+.wv-card-text { font-size: 14px; }
+.wv-props { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; font-size: 13.5px; margin: 8px 0 0; }
+.wv-props dt { color: var(--muted); }
+.wv-props dd { margin: 0; overflow-wrap: anywhere; }
+.wv-card-list { list-style: none; margin: 0; padding: 0; }
+.wv-card-list button { display: flex; flex-direction: column; gap: 2px; width: 100%; text-align: left; background: none; border: 0; border-top: 1px solid var(--line); padding: 8px 2px; cursor: pointer; }
+.wv-card-list button:hover { background: var(--bg); }
+
+.wv-loading { position: absolute; inset: 0; z-index: 40; display: grid; place-items: center; background: var(--bg); color: var(--muted); font-size: 15px; }
+.wv-loading[hidden] { display: none; }
+
+/* the globe engine's widgets we don't use */
+.cesium-viewer-toolbar, .cesium-viewer-animationContainer, .cesium-viewer-timelineContainer,
+.cesium-viewer-fullscreenContainer, .cesium-viewer-vrContainer, .cesium-viewer-geocoderContainer { display: none !important; }
+#cesium-credits { position: absolute; left: 8px; bottom: 6px; max-width: calc(100% - 16px); z-index: 5; font-size: 11px; background: rgb(255 255 255 / 0.75); color: #333; border-radius: 6px; padding: 2px 6px; }
+#cesium-credits a { color: #333; }
+
+@media (max-width: 800px) {
+  .wv-stage { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
+  .wv-panel { order: 2; max-height: 40vh; border-right: 0; border-top: 1px solid var(--line); }
+  .wv-place-search { display: none; }
+}

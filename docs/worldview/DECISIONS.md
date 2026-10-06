@@ -2,6 +2,39 @@
 
 Newest first. Each entry: what we chose, and why.
 
+## 2026-10-06 — A clean Worldview globe instead of restyling God's Eye View
+
+- Owner wanted a modern, simple, data-first globe without GEV's "spy"
+  styling or branding. Rather than restyle GEV's ~20 interface stylesheets
+  (which would conflict with every upstream update), we built **our own
+  page, `globe.html`**, that uses GEV only as an *engine*: its globe, base
+  maps and data layers (via `src/standalone/scene.js`, `catalog.js` and
+  `data/lifecycle.js`), with none of its interface.
+- **`/` now opens the Worldview globe.** GEV's interface remains at
+  `/index.html` ("Classic view" link) for tools not yet brought across:
+  CCTV viewer, radio player, key setup, scenes/director.
+- **Layer list in `config/worldview/layers.json`** (JSON rather than YAML so
+  the browser can read it without extra code). Left out on purpose:
+  licence-plate-reader cameras (guardrails), a one-off Nepal demo, and
+  helpers that only make sense in the classic UI.
+- **My News**: pins coloured by the article's *subject* topic (falling back
+  to its broad topic), grouped into numbered clusters when crowded, grey dots
+  for stories placed only at country level. A story's places are joined by
+  a numbered line **only when it's selected**; drawing every multi-place
+  story at once was an unreadable tangle.
+- **Clicks**: My News items open an article card; any other engine item
+  shows a generic card of its readable properties. Because some engine
+  layers draw their symbols separately from their data, a click that hits
+  nothing picks the nearest item within 14 px (skipping the far side of
+  the Earth).
+- No on-globe text labels for our items: GEV's tests forbid Cesium labels
+  (blurry, slow); the card lists places instead. Cluster counts are the
+  one exception, drawn by Cesium's clustering itself.
+- Upstream files touched: `scripts/check-import-directions.mjs` (+3 lines,
+  treat `src/worldview/*/main.js` as page entries like `src/main.js`) and
+  `server/worldview/newsProxy.js` (ours) now also redirects `/`.
+- Single-article API now returns places and topics (via a new `ids` filter).
+
 ## 2026-10-05 — World topic
 
 - Same treatment as Canada: new broad **World** topic is the default for Al

@@ -64,4 +64,4 @@ say "Checking the globe app"
 npm run -s doctor || true
 
 say "Done! Start everything with:  ./start.sh"
-echo "Then open the Reader at http://localhost:4173/reader.html"
+echo "Then open http://localhost:4173 (globe) or http://localhost:4173/reader.html (reader)"

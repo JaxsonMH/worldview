@@ -209,7 +209,7 @@ alerts, data retention (e.g. prune articles > 90 days unless starred).
   - `RUNNING.md` — start/stop/update, common fixes.
   - `ADDING-A-FEED.md`, `ADDING-A-LAYER.md` — step-by-step recipes.
   - `DECISIONS.md` — log of choices and why.
-- Config in files (`feeds.opml`, `topics.yaml`, `layers.yaml`), not in code.
+- Config in files (`feeds.opml`, `topics.yaml`, `layers.json`), not in code.
 - `make health` (or `./health.sh`) checks every feed and layer and reports in plain English.
 - Tests for the geoparser and filter logic.
 - Keep upstream GEV changes mergeable: put our code in clearly separate folders.
@@ -234,10 +234,15 @@ Present this list to the owner for approval before importing.
 
 ## 17. Progress (keep updated)
 
-Code layout: `news/` (Python news service), `config/worldview/` (feeds, topics, place settings),
-`src/worldview/` + `reader.html` (Reader), `server/worldview/` (API forwarder), `docs/worldview/`,
-`scripts/worldview/`, `start.sh`, `Makefile`. Everything else is upstream GEV (edited only:
-`server/standalone/vite.config.js` +2 lines, `src/tooling/viteBuild.test.mjs` plugin order).
+Code layout: `news/` (Python news service), `config/worldview/` (feeds, topics, place settings,
+globe layers), `src/worldview/` + `reader.html` + `globe.html` (our pages), `server/worldview/`
+(API forwarder + home-page redirect), `docs/worldview/`, `scripts/worldview/`, `start.sh`,
+`Makefile`. Everything else is upstream GEV, used as an engine; edited only:
+`server/standalone/vite.config.js` (+2 lines), `src/tooling/viteBuild.test.mjs` (plugin order),
+`scripts/check-import-directions.mjs` (our page entries).
+
+UI direction (owner, 2026-10-06): clean, modern, data-first. No GEV "spy" styling or
+branding in Worldview pages; GEV's own UI stays reachable as "Classic view" only.
 
 - **Phase 0:** ✔ repo is the GEV fork ✔ GEV boots keyless on Node 24 (`npm run doctor`)
   ✔ `scripts/worldview/setup-mac.sh` + `docs/worldview/SETUP-MAC.md` written
@@ -251,5 +256,9 @@ Code layout: `news/` (Python news service), `config/worldview/` (feeds, topics, 
   ✔ Reader (`/reader.html`): filters, saved searches, feed management, topic editing
   ✔ `/api/news` proxy in Vite ✔ geo spot-check: 96% city-level on an unseen sample of 50
   ☐ owner verification on the Mac. **Phase 1 is otherwise complete.**
-- **Phase 2 next:** My News globe layer, "Show on globe" (button exists, disabled), layer panel,
-  `make health`.
+- **Phase 2:** ✔ clean Worldview globe (`globe.html`, home page) on the GEV engine
+  ✔ layer panel grouped by subject with live status / "needs a key" / "unavailable"
+  ✔ My News layer (topic colours, clusters, country buckets, route line on selection, time window)
+  ✔ "Show on globe" ↔ "Open in Reader" round trip ✔ click cards for engine layers
+  ☐ owner check on the Mac ☐ `make health` ☐ new layers (GDELT, GDACS, BC Wildfire, EC alerts…)
+  ☐ custom time window on the globe ☐ bring across CCTV viewer / key setup from Classic view.

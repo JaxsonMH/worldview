@@ -37,7 +37,7 @@ small { color: var(--muted); }
 
 /* top bar */
 .wv-top { display: flex; align-items: center; gap: 20px; padding: 8px 16px; background: var(--panel); border-bottom: 1px solid var(--line); }
-.wv-brand { font-weight: 700; letter-spacing: 0.02em; color: var(--text); text-decoration: none; font-size: 17px; }
+.wv-brand { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; letter-spacing: 0.02em; color: var(--text); text-decoration: none; font-size: 17px; }
 .wv-tabs { display: flex; gap: 4px; }
 .wv-tab { padding: 5px 12px; border-radius: 6px; text-decoration: none; color: var(--muted); }
 .wv-tab.is-active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }

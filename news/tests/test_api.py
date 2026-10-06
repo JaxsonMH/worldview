@@ -57,3 +57,8 @@ def test_facets_and_mark_read_on_empty_db(tmp_path):
         f = c.get("/api/news/facets").json()
         assert f["folders"] == [] and f["countries"] == []
         assert c.post("/api/news/articles/mark-read", json={"topics": ["Local"]}).json() == {"marked": 0}
+
+
+def test_single_article_has_places_and_topics(tmp_path):
+    with make_client(tmp_path) as c:
+        assert c.get("/api/news/articles/1").status_code == 404

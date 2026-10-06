@@ -9,8 +9,11 @@ const builtins = new Set(
   builtinModules.flatMap((name) => [name, `node:${name}`]),
 );
 const code = /\.[mc]?js$/;
+// Worldview: its page entries (src/worldview/<page>/main.js) compose the app like src/main.js.
 const entry = (file) =>
-  file === 'src/main.js' || file.startsWith('src/standalone/');
+  file === 'src/main.js' ||
+  file.startsWith('src/standalone/') ||
+  /^src\/worldview\/[^/]+\/main\.js$/.test(file);
 const tests = (file) =>
   file.endsWith('.test.mjs') ||
   file.startsWith('src/testSupport/') ||

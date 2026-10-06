@@ -30,8 +30,8 @@ trap 'kill 0' EXIT INT TERM
 echo "Starting news service on http://127.0.0.1:8765  (API docs: /docs)"
 (cd news && uv run python -m worldview_news serve) &
 
-echo "Starting globe app on http://localhost:4173"
-echo "Reader: http://localhost:4173/reader.html   (Ctrl+C to stop)"
+echo "Starting Worldview: globe at http://localhost:4173 , reader at http://localhost:4173/reader.html"
+echo "(Ctrl+C to stop)"
 npm run dev &
 
 wait

@@ -14,7 +14,7 @@
 
 | Piece | Folder | What it does |
 |---|---|---|
-| **Globe app** | everything outside `news/` (the God's Eye View fork) | The 3D globe and its live layers (flights, ships, quakes…). |
+| **Globe app** | everything outside our folders (the God's Eye View fork) | The 3D globe engine and its live layers (flights, ships, quakes…). |
 | **News service** | `news/` | A small Python program that runs in the background. |
 | ↳ Feed fetcher | `news/worldview_news/fetcher.py` | Every 10 minutes, downloads each feed and saves new articles. Skips duplicates; fixes feeds that claim articles from the future. ISW (no RSS) is read by `wordpress.py`. |
 | ↳ Geoparser | `news/worldview_news/geoparser.py` | Finds where each article happened (see below). |
@@ -23,8 +23,13 @@
 | ↳ Topic tagger | `news/worldview_news/topics.py` | Feed default → keyword rules → place rules → your manual edits. |
 | ↳ Filters | `news/worldview_news/filters.py` | The one "which articles do you want?" description that both the Reader and the Globe use. |
 | ↳ REST API | `news/worldview_news/api.py` | The web addresses (`/api/news/...`) the app calls. |
-| **Reader** | `reader.html`, `src/worldview/` | The news reader page: http://localhost:4173/reader.html |
-| ↳ Shared filter | `src/worldview/newsFilter.js` | The browser's copy of the filter rules; also keeps the filter in the page address. |
+| **Globe** | `globe.html`, `src/worldview/globe/` | Worldview's home page: the 3D globe with your news and live layers. |
+| ↳ Globe engine | everything outside our folders | God's Eye View supplies the globe, base maps and data layers; our page supplies the interface. |
+| ↳ My News | `src/worldview/globe/myNews.js` | Article pins coloured by topic; grey dots = stories placed only at country level. |
+| ↳ Layer list | `config/worldview/layers.json` | Which engine layers the panel offers, grouped. |
+| **Reader** | `reader.html`, `src/worldview/reader/` | The news reader page: http://localhost:4173/reader.html |
+| ↳ Shared filter | `src/worldview/newsFilter.js` | The browser's copy of the filter rules, used by Reader *and* Globe; also keeps the filter in the page address. |
+| ↳ Shared helpers | `src/worldview/ui.js`, `newsApi.js` | Small building blocks both pages use. |
 | ↳ Forwarder | `server/worldview/newsProxy.js` | Passes `/api/news` from the globe app's server to the news service, so the browser talks to one address. |
 | **Database** | `news/data/worldview.sqlite3` | One file holding feeds, articles, places, topics and saved searches. |
 | **Settings** | `config/worldview/` | `feeds.opml` (feeds), `topics.yaml` (topics + rules), `geoparser.yaml` and `place-aliases.yaml` (place finding). Edit these, not code. |
@@ -56,6 +61,14 @@ Eye View project can still be pulled in without clashes.
 5. Several places → several pins, in the order the story mentions them.
 
 When a pin is wrong, see [TUNING-PLACES-AND-TOPICS.md](TUNING-PLACES-AND-TOPICS.md).
+
+## Reader ↔ Globe
+
+- **Show on globe** (Reader): opens the globe with your current filters,
+  flies to the story and numbers its places in the order mentioned.
+- **Open in Reader** (globe card): opens that story in the Reader.
+- Clicking any other dot (a quake, a plane…) shows what that data source says
+  about it, with its source in the layer panel.
 
 ## A filter, in plain terms
 

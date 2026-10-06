@@ -116,10 +116,11 @@ def create_app(db_path=None, start_scheduler: bool = True, import_opml: bool = T
 
     @app.get("/api/news/articles/{article_id}")
     def get_article(article_id: int):
-        row = conn.execute("SELECT * FROM articles WHERE id = ?", (article_id,)).fetchone()
-        if not row:
+        """One article with its feed name, topics and confident places (same shape as search results)."""
+        articles, _ = select_articles(conn, ArticleFilter(ids=[article_id]))
+        if not articles:
             raise HTTPException(404, "No such article")
-        return dict(row)
+        return articles[0]
 
     @app.patch("/api/news/articles/{article_id}")
     def patch_article(article_id: int, patch: ArticlePatch):

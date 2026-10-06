@@ -109,3 +109,7 @@ def test_paging(db):
     assert [a["id"] for a in articles] == [3, 1] and total == 4
     articles, total = select_articles(db, ArticleFilter(limit=2, offset=2), now=NOW)
     assert [a["id"] for a in articles] == [4, 2] and total == 4
+
+
+def test_ids(db):
+    assert ids(db, ids=[2, 4]) == [4, 2]

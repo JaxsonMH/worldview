@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Worldview · Globe</title>
+  <link rel="icon" type="image/svg+xml" href="/worldview-icon.svg" />
+  <link rel="stylesheet" href="/src/worldview/globe/globe.css" />
+</head>
+<body>
+  <header class="wv-top">
+    <a class="wv-brand" href="/globe.html"><img src="/worldview-icon.svg" alt="" width="20" height="20" />Worldview</a>
+    <nav class="wv-tabs" aria-label="Views">
+      <a class="wv-tab" href="/reader.html">Reader</a>
+      <a class="wv-tab is-active" href="/globe.html" aria-current="page">Globe</a>
+    </nav>
+    <form id="place-search" class="wv-place-search" role="search">
+      <input type="search" placeholder="Go to a place…" aria-label="Go to a place" autocomplete="off" />
+      <div class="wv-suggest" hidden></div>
+    </form>
+  </header>
+  <div class="wv-stage">
+    <aside id="panel" class="wv-panel" aria-label="Layers"></aside>
+    <div id="cesiumContainer" class="wv-globe"></div>
+    <div id="card" class="wv-card" hidden></div>
+    <div id="loading" class="wv-loading"><span class="loader-status">Loading the globe…</span></div>
+  </div>
+  <div id="toast" class="wv-toast" role="alert" hidden></div>
+  <script type="module" src="/src/worldview/globe/main.js"></script>
+</body>
+</html>

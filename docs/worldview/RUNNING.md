@@ -7,8 +7,9 @@
 ```
 Press **Ctrl+C** in that window to stop both.
 
-- **Reader: http://localhost:4173/reader.html**
-- Globe: http://localhost:4173
+- **Globe: http://localhost:4173** (Worldview's home page)
+- **Reader: http://localhost:4173/reader.html** (or the Reader tab)
+- Classic God's Eye View interface: http://localhost:4173/index.html
 - News service: http://127.0.0.1:8765 (interactive API page: http://127.0.0.1:8765/docs)
 
 The very first start also builds the place list (downloads ~20 MB, about a minute)
