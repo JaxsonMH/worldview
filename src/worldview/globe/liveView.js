@@ -12,6 +12,7 @@ import { composeCatalog, coreTools } from '../../tools/index.js';
 import { createToolServices } from '../../tools/services.js';
 import { newsApi } from '../newsApi.js';
 import { fullTime, h, timeAgo } from '../ui.js';
+import { SEVERITY_COLORS } from './badges.js';
 
 const RADII = [5, 25, 100, 300];
 const REFRESH_MS = 60_000;
@@ -49,6 +50,13 @@ const SECTIONS = [
     source: 'DriveBC and other public road cameras',
   },
   { id: 'weather', icon: '🌤️', title: 'Weather now', source: 'Open-Meteo' },
+  {
+    id: 'events',
+    icon: '🚨',
+    title: 'Alerts & events',
+    source:
+      'Wildfires, weather alerts, road events, disasters, volcanoes, tsunami, world events, outages',
+  },
   { id: 'news', icon: '📰', title: 'News here', source: 'Your feeds' },
   { id: 'quakes', icon: '🌋', title: 'Earthquakes (24h)', source: 'USGS' },
   { id: 'fires', icon: '🔥', title: 'Active fires', source: 'NASA FIRMS' },
@@ -125,6 +133,7 @@ export function createLiveView({ viewer, root, onOpenArticle, topicColor }) {
     const jobs = {
       cameras: () => tools().call('find_cctv_cameras', { area, limit: 60 }),
       weather: () => tools().call('get_weather', { location: point }),
+      events: () => newsApi.nearby(lat, lon, Math.max(r, 50)),
       news: () =>
         newsApi.search({
           near: { lat, lon, km: Math.max(r, 10) },
@@ -240,6 +249,11 @@ export function createLiveView({ viewer, root, onOpenArticle, topicColor }) {
       dot(row, '#f77f00', 7, { worldviewLiveSection: 'fires' });
     for (const row of rows('ships'))
       dot(row, '#06d6a0', 7, { worldviewLiveSection: 'ships' });
+    for (const group of state.results.events?.value?.sources ?? [])
+      for (const e of group.events)
+        dot(e, SEVERITY_COLORS[e.severity ?? 0], 9, {
+          worldviewLiveSection: 'events',
+        });
     viewer.scene.requestRender();
   }
 
@@ -378,6 +392,64 @@ export function createLiveView({ viewer, root, onOpenArticle, topicColor }) {
                 `Nearest ${MAX_CAMERAS} of ${value.data.total}; shrink the radius or click camera dots on the globe.`,
               )
             : null,
+        ),
+      };
+    },
+    events(value) {
+      const groups = value.sources.filter((g) => g.events.length);
+      const total = groups.reduce((n, g) => n + g.total, 0);
+      return {
+        count: total,
+        body: h(
+          'div',
+          {},
+          groups.map((g) =>
+            h(
+              'div.wv-live-group',
+              {},
+              h(
+                'h4',
+                `${g.icon} ${g.name}`,
+                g.total > g.events.length ? ` (${g.total})` : '',
+              ),
+              h(
+                'ul.wv-live-list',
+                {},
+                g.events.slice(0, 5).map((e) =>
+                  h(
+                    'li',
+                    {},
+                    h(
+                      e.url ? 'a.wv-live-link' : 'span',
+                      e.url
+                        ? {
+                            href: e.url,
+                            target: '_blank',
+                            rel: 'noopener noreferrer',
+                          }
+                        : {},
+                      h('span.wv-dot', {
+                        style: {
+                          background: SEVERITY_COLORS[e.severity ?? 0],
+                        },
+                      }),
+                      ' ',
+                      e.title,
+                    ),
+                    h(
+                      'small',
+                      [
+                        e.time && timeAgo(e.time),
+                        e.summary && e.summary.slice(0, 110),
+                      ]
+                        .filter(Boolean)
+                        .join(' · '),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ),
       };
     },

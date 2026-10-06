@@ -265,5 +265,9 @@ own UI stays reachable as "Classic view" only. Owner wants rich per-location liv
   named only as context no longer creates lines (`newsLevels.js`)
   ✔ Live view: cameras (live pictures), weather, news, quakes, aircraft, ships, satellites… for any spot
   ✔ "night atlas" visual refresh, layer search/icons, ticker, day/night shading
-  ☐ owner check on the Mac ☐ `make health` ☐ new layers (GDELT, GDACS, BC Wildfire, EC alerts…)
+  ✔ `make health` ✔ 12 new live sources (`news/worldview_news/sources/`: BC Wildfire, EC alerts,
+  DriveBC events, NRCan quakes, GDACS, volcanoes, tsunami, GDELT, IODA outages, aurora,
+  OpenAQ (needs key), power plants) with cards + "Related news" + Live view "Alerts & events"
+  ✔ topic bar filter on the globe ✔ Live TV (YouTube live embeds)
+  ☐ owner check on the Mac ☐ sign-up sources (ACLED, UCDP, ReliefWeb, GFW, Cloudflare Radar)
   ☐ custom time window on the globe ☐ key setup inside Worldview (still in Classic view).

@@ -73,6 +73,14 @@ export function createMyNews({ viewer, card, onExplore }) {
     selectedArticle: null,
     showAllLinks: false,
   };
+  // Topic filter on the globe (the topic bar): null = every topic. Kept per
+  // viewer in this browser; it filters what's drawn without reloading.
+  state.visibleTopics = loadVisibleTopics();
+  const visible = (a) =>
+    !state.visibleTopics ||
+    a.topics.some((t) => state.visibleTopics.has(t.topic));
+  const visibleArticles = () => [...state.articles.values()].filter(visible);
+
   const listeners = new Set();
   const changed = () => listeners.forEach((fn) => fn());
   let timer = null;
@@ -145,11 +153,7 @@ export function createMyNews({ viewer, card, onExplore }) {
   /** Group stories at the current level and redraw markers (and the selection). */
   function regroup() {
     state.level = currentLevel();
-    state.groups = aggregate(
-      [...state.articles.values()],
-      state.level,
-      state.anchors,
-    );
+    state.groups = aggregate(visibleArticles(), state.level, state.anchors);
     if (state.selectedUnit && !state.groups.units.has(state.selectedUnit))
       state.selectedUnit = null;
     drawMarkers();
@@ -561,9 +565,7 @@ export function createMyNews({ viewer, card, onExplore }) {
   function controls() {
     const f = state.filter;
     const extra = describeFilter({ ...f, last_hours: undefined });
-    const present = new Set(
-      [...state.articles.values()].map(subjectOf).filter(Boolean),
-    );
+    const present = new Set(visibleArticles().map(subjectOf).filter(Boolean));
     return h(
       'div.wv-news-controls',
       {},
@@ -690,11 +692,31 @@ export function createMyNews({ viewer, card, onExplore }) {
     topicColor,
     colorOf: (a) => topicColor(subjectOf(a)),
     get count() {
-      return state.articles.size;
+      return visibleArticles().length;
+    },
+    /** Stories per topic in the current time window (for the topic bar). */
+    topicCounts() {
+      const counts = new Map();
+      for (const a of state.articles.values())
+        for (const t of a.topics)
+          counts.set(t.topic, (counts.get(t.topic) ?? 0) + 1);
+      return counts;
+    },
+    get topics() {
+      return state.topics;
+    },
+    get visibleTopics() {
+      return state.visibleTopics;
+    },
+    /** Show only these topics (a Set), or every topic (null). */
+    setVisibleTopics(topics) {
+      state.visibleTopics = topics && topics.size ? new Set(topics) : null;
+      saveVisibleTopics(state.visibleTopics);
+      regroup();
     },
     /** Newest stories, for the headline ticker. */
     latest(n) {
-      return [...state.articles.values()]
+      return visibleArticles()
         .sort((x, y) => y.published_at.localeCompare(x.published_at))
         .slice(0, n);
     },
@@ -711,6 +733,26 @@ export function createMyNews({ viewer, card, onExplore }) {
     controls,
     onChange: (fn) => listeners.add(fn),
   };
+}
+
+function loadVisibleTopics() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('worldview.globe.topics'));
+    return Array.isArray(saved) && saved.length ? new Set(saved) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveVisibleTopics(topics) {
+  try {
+    localStorage.setItem(
+      'worldview.globe.topics',
+      JSON.stringify(topics ? [...topics] : null),
+    );
+  } catch {
+    // Storage can be unavailable (private windows): the filter just isn't remembered.
+  }
 }
 
 function distanceKm(lat1, lon1, lat2, lon2) {

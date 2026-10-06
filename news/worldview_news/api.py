@@ -24,7 +24,7 @@ from .db import connect, haversine_km, init_db
 from .feedcheck import check_feed, make_client
 from .fetcher import fetch_all, fetch_feed, iso
 from .filters import ArticleFilter, build_query, select_articles
-from .gazetteer import GAZETTEER_PATH, normalize
+from .gazetteer import GAZETTEER_PATH, compute_anchors, normalize
 from .opml import export_opml, import_feeds, read_opml, read_opml_text
 from .geoparser import geoparse_pending
 from .topics import load_topics, set_manual_topics
@@ -286,36 +286,42 @@ def create_app(db_path=None, start_scheduler: bool = True, import_opml: bool = T
         """Map points for every country and province/state, used when the globe
         groups stories by country or province. A country's point is the middle of
         its towns (so "Canada" isn't drawn on Ottawa); provinces use the gazetteer's."""
-        if anchors_cache:
-            return anchors_cache
-        gz = gazetteer()
-        if not gz:
-            return {"countries": {}, "regions": {}}
-        try:
-            sums: dict[str, list[float]] = {}
-            for r in gz.execute("SELECT country_code, lat, lon FROM gz_places WHERE kind = 'city'"):
-                la, lo = math.radians(r["lat"]), math.radians(r["lon"])
-                acc = sums.setdefault(r["country_code"], [0.0, 0.0, 0.0])
-                acc[0] += math.cos(la) * math.cos(lo)
-                acc[1] += math.cos(la) * math.sin(lo)
-                acc[2] += math.sin(la)
-            countries = {}
-            for r in gz.execute("SELECT country_code, name, lat, lon FROM gz_places WHERE kind = 'country'"):
-                x, y, z = sums.get(r["country_code"], (0, 0, 0))
-                if x or y or z:  # average on the sphere, so countries across the date line work
-                    lat = math.degrees(math.atan2(z, math.hypot(x, y)))
-                    lon = math.degrees(math.atan2(y, x))
-                else:
-                    lat, lon = r["lat"], r["lon"]
-                countries[r["country_code"]] = {"name": r["name"], "lat": round(lat, 3), "lon": round(lon, 3)}
-            regions = {
-                f"{r['country_code']}.{r['admin1']}": {"name": r["name"], "lat": round(r["lat"], 3), "lon": round(r["lon"], 3)}
-                for r in gz.execute("SELECT country_code, admin1, name, lat, lon FROM gz_places WHERE kind = 'region'")
-            }
-        finally:
-            gz.close()
-        anchors_cache.update(countries=countries, regions=regions)
+        if not anchors_cache:
+            anchors_cache.update(compute_anchors(GAZETTEER_PATH))
         return anchors_cache
+
+    # ---------- live data sources (wildfires, alerts, road events, …) ----------
+    from .sources import Registry
+
+    registry = Registry(config.load_keys(), anchors=anchors)
+    app.state.registry = registry
+
+    @app.get("/api/news/sources")
+    def list_sources():
+        """Every live data source, whether it needs a key, and its last fetch."""
+        return [registry.describe(s) for s in registry.sources.values()]
+
+    @app.get("/api/news/sources/{source_id}/events")
+    def source_events(source_id: str, bbox: str | None = None):
+        """One source's events (fetched if stale). bbox = west,south,east,north to trim."""
+        if source_id not in registry.sources:
+            raise HTTPException(404, "No such source")
+        result = registry.get(source_id)
+        if bbox:
+            try:
+                w, so, e, n = (float(x) for x in bbox.split(","))
+            except ValueError:
+                raise HTTPException(422, "bbox must be west,south,east,north")
+            inside = (lambda lon: w <= lon <= e) if w <= e else (lambda lon: lon >= w or lon <= e)
+            result = result | {"events": [ev for ev in result["events"] if so <= ev["lat"] <= n and inside(ev["lon"])]}
+        return result
+
+    @app.get("/api/news/nearby")
+    def nearby(lat: float, lon: float, km: float = 50, sources: str | None = None):
+        """Everything from the live sources within km of a point (the Live view and
+        "what else is here?")."""
+        ids = sources.split(",") if sources else [s for s in registry.sources if s != "power-plants"]
+        return {"lat": lat, "lon": lon, "km": km, "sources": registry.near(lat, lon, min(km, 2000), ids)}
 
     @app.get("/api/news/places/nearest")
     def place_nearest(lat: float, lon: float):

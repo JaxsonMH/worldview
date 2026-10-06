@@ -29,6 +29,9 @@ export const newsApi = {
   facets: () => call('GET', '/facets'),
   topics: () => call('GET', '/topics'),
   anchors: () => call('GET', '/anchors'),
+  sources: () => call('GET', '/sources'),
+  nearby: (lat, lon, km) =>
+    call('GET', `/nearby?lat=${lat}&lon=${lon}&km=${km}`),
   placeNearest: (lat, lon) =>
     call('GET', `/places/nearest?lat=${lat}&lon=${lon}`),
   placeSearch: (q) => call('GET', `/places/search?q=${encodeURIComponent(q)}`),

@@ -20,6 +20,12 @@ for tool in uv npm; do
   fi
 done
 
+# After a "git pull": install any new globe-app packages (Python ones are handled by uv).
+if [ ! -d node_modules ] || [ package-lock.json -nt node_modules ]; then
+  echo "Installing globe app packages (only after an update)..."
+  npm ci && touch node_modules
+fi
+
 if [ ! -f news/data/gazetteer.sqlite3 ]; then
   echo "First run: building the place list (downloads ~20 MB from GeoNames, about a minute)..."
   (cd news && uv run python -m worldview_news gazetteer)

@@ -8,6 +8,10 @@ key (a password-like code that identifies you). Without one, the layer shows
 |---|---|---|---|
 | Active fires | NASA FIRMS | https://firms.modaps.eosdis.nasa.gov/api/map_key/ (just your email) | `FIRMS_MAP_KEY` |
 | Ships | AISStream | https://aisstream.io (sign in with GitHub, then "API Keys") | `AISSTREAM_API_KEY` |
+| Air quality (PM2.5) | OpenAQ | https://explore.openaq.org/register, then your account page → "API Key" | `OPENAQ_API_KEY` |
+
+The OpenAQ key can't be pasted into the Classic view; add it **by hand**
+(below).
 
 ## Easiest: paste it into the app
 

@@ -29,9 +29,34 @@ reload the globe page.
 
 The **Classic view** (link at the bottom of the panel) still has all of them.
 
-## A brand-new data source
+## Worldview's own sources (BC wildfires, alerts, GDELT…)
 
-New layers (GDELT, disaster alerts, BC Wildfire…) are Phase 2/3 work: they
-need a small piece of code that fetches the data, plus a line in
-`layers.json`. Ask Claude; this file will gain a step-by-step recipe once the
-first one is built.
+Some layers come from the news service rather than the globe engine. Their
+lines in `layers.json` look like
+
+```json
+{ "id": "src:bc_wildfire", "source": "bc_wildfire", "style": "icon" }
+```
+
+and can be hidden, moved or switched on by default exactly like the others.
+`style` is `icon` (emoji marker coloured by severity), `dots` (small dots,
+used for power plants) or `aurora`.
+
+## A brand-new data source (recipe)
+
+1. Copy a small existing one, e.g. `news/worldview_news/sources/tsunami.py`,
+   to a new file in the same folder. Change `id`, `name`, `icon`, `about`,
+   `attribution`, `homepage` and how often it refreshes (`refresh_minutes`).
+2. In its `fetch` function, download the data and turn each item into an
+   event with `event(id=…, title=…, lat=…, lon=…, time=…, severity=0–3, url=…)`.
+   Severity: 0 information, 1 minor, 2 moderate, 3 severe.
+3. If the service needs a key, set `needs_key="SOME_KEY_NAME"` and
+   `key_help` (see ADDING-A-KEY.md); it's read from `.env`.
+4. Add the module name to the list in `sources/__init__.py` (`_all_sources`).
+5. Add a line to `config/worldview/layers.json` as above.
+6. Restart (`./start.sh`), then run `make health`: the new source should
+   show ✅ with a count.
+
+Rules that always apply: only events, places and infrastructure, never
+people; respect each service's terms and rate limits; always keep the
+source's name and a link (the card shows them).

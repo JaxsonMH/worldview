@@ -1,5 +1,5 @@
 {
-  "_help": "Which layers the Worldview globe offers, in which group, and which start switched on. Edit and reload the page. 'icon' is any emoji. Layer ids come from the globe engine; 'needsKey' names the free key a layer needs (see docs/worldview/ADDING-A-KEY.md).",
+  "_help": "Which layers the Worldview globe offers, in which group, and which start switched on. Edit and reload the page. 'icon' is any emoji. Layer ids come from the globe engine; 'needsKey' names the free key a layer needs (see docs/worldview/ADDING-A-KEY.md). Entries with a 'source' come from Worldview's own live sources (news/worldview_news/sources/); 'style' is icon, dots or aurora.",
   "groups": [
     {
       "name": "News",
@@ -15,13 +15,54 @@
       "icon": "📰"
     },
     {
-      "name": "Hazards & weather",
+      "name": "Hazards",
+      "icon": "⚠️",
       "layers": [
         {
           "id": "earthquakes",
           "name": "Earthquakes (24h)",
           "about": "USGS, magnitude 2.5+",
-          "icon": "🌋"
+          "icon": "🌐"
+        },
+        {
+          "id": "src:bc-wildfires",
+          "source": "bc-wildfires",
+          "name": "BC wildfires",
+          "icon": "🔥",
+          "about": "BC Wildfire Service, active fires",
+          "style": "icon"
+        },
+        {
+          "id": "src:gdacs",
+          "source": "gdacs",
+          "name": "Disaster alerts (world)",
+          "icon": "🆘",
+          "about": "GDACS: quakes, cyclones, floods, droughts",
+          "style": "icon"
+        },
+        {
+          "id": "src:nrcan-quakes",
+          "source": "nrcan-quakes",
+          "name": "Earthquakes Canada (7 days)",
+          "icon": "🫨",
+          "about": "NRCan, including small quakes",
+          "style": "icon"
+        },
+        {
+          "id": "src:volcanoes",
+          "source": "volcanoes",
+          "name": "Volcanoes erupting",
+          "icon": "🌋",
+          "about": "Smithsonian GVP + USGS alerts",
+          "style": "icon"
+        },
+        {
+          "id": "src:tsunami",
+          "source": "tsunami",
+          "name": "Tsunami bulletins",
+          "icon": "🌊",
+          "about": "NOAA warning centres",
+          "style": "icon"
         },
         {
           "id": "local-firms",
@@ -35,6 +76,20 @@
           "name": "Wildfire perimeters (US)",
           "about": "NIFC wildfire outlines",
           "icon": "🧯"
+        }
+      ]
+    },
+    {
+      "name": "Weather & sky",
+      "icon": "🌦️",
+      "layers": [
+        {
+          "id": "src:ec-alerts",
+          "source": "ec-alerts",
+          "name": "Weather alerts (Canada)",
+          "icon": "⚠️",
+          "about": "Environment Canada warnings & watches",
+          "style": "icon"
         },
         {
           "id": "weather-radar",
@@ -65,9 +120,47 @@
           "name": "Wind",
           "about": "Forecast wind (GFS / ECMWF)",
           "icon": "💨"
+        },
+        {
+          "id": "src:aurora",
+          "source": "aurora",
+          "name": "Aurora forecast",
+          "icon": "🌌",
+          "about": "Where the northern lights may show tonight",
+          "style": "aurora"
+        },
+        {
+          "id": "src:air-quality",
+          "source": "air-quality",
+          "name": "Air quality (PM2.5)",
+          "icon": "😷",
+          "about": "OpenAQ monitors",
+          "style": "dots",
+          "needsKey": "OpenAQ"
         }
-      ],
-      "icon": "⚠️"
+      ]
+    },
+    {
+      "name": "World events",
+      "icon": "📢",
+      "layers": [
+        {
+          "id": "src:gdelt",
+          "source": "gdelt",
+          "name": "Protests & clashes (GDELT)",
+          "icon": "📢",
+          "about": "Machine-read from world news, last 24 h",
+          "style": "icon"
+        },
+        {
+          "id": "src:internet-outages",
+          "source": "internet-outages",
+          "name": "Internet outages",
+          "icon": "📵",
+          "about": "Country/province-wide drops (IODA)",
+          "style": "icon"
+        }
+      ]
     },
     {
       "name": "Air & space",
@@ -138,6 +231,14 @@
           "name": "Military bases",
           "about": "Mapped in OpenStreetMap",
           "icon": "🪖"
+        },
+        {
+          "id": "src:power-plants",
+          "source": "power-plants",
+          "name": "Power plants (100 MW+)",
+          "icon": "🏭",
+          "about": "WRI database (static, 2021)",
+          "style": "dots"
         }
       ],
       "icon": "🏗️"
@@ -145,6 +246,14 @@
     {
       "name": "Getting around",
       "layers": [
+        {
+          "id": "src:drivebc",
+          "source": "drivebc",
+          "name": "BC road events",
+          "icon": "🚧",
+          "about": "DriveBC closures, incidents, construction",
+          "style": "icon"
+        },
         {
           "id": "traffic",
           "name": "Road traffic",

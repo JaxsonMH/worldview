@@ -12,7 +12,13 @@ import {
 
 test('cleanFilter drops empty values and normalises order', () => {
   assert.deepEqual(
-    cleanFilter({ q: '  ', topics: ['Local', 'BC Politics', 'Local'], feeds: ['3', 1], read: null, sort: 'newest' }),
+    cleanFilter({
+      q: '  ',
+      topics: ['Local', 'BC Politics', 'Local'],
+      feeds: ['3', 1],
+      read: null,
+      sort: 'newest',
+    }),
     { topics: ['BC Politics', 'Local'], feeds: [1, 3] },
   );
 });
@@ -35,16 +41,28 @@ test('hash round trip keeps every kind of value', () => {
 });
 
 test('toQuery strips display-only labels and adds paging', () => {
-  assert.deepEqual(toQuery({ near: { lat: 1, lon: 2, km: 3, label: 'X' } }, { offset: 100 }), {
-    near: { lat: 1, lon: 2, km: 3 },
-    limit: 100,
-    offset: 100,
-  });
+  assert.deepEqual(
+    toQuery({ near: { lat: 1, lon: 2, km: 3, label: 'X' } }, { offset: 100 }),
+    {
+      near: { lat: 1, lon: 2, km: 3 },
+      limit: 100,
+      offset: 100,
+    },
+  );
 });
 
 test('describeFilter and removePart work together', () => {
-  const filter = { topics: ['Local'], country: 'CA', admin1: '02', city: 'Victoria', last_hours: 24 };
-  const parts = describeFilter(filter, { countries: { CA: 'Canada' }, regions: { 'CA.02': 'British Columbia' } });
+  const filter = {
+    topics: ['Local'],
+    country: 'CA',
+    admin1: '02',
+    city: 'Victoria',
+    last_hours: 24,
+  };
+  const parts = describeFilter(filter, {
+    countries: { CA: 'Canada' },
+    regions: { 'CA.02': 'British Columbia' },
+  });
   assert.deepEqual(
     parts.map((p) => p.label),
     ['Local', 'last 24 hours', 'Victoria', 'British Columbia', 'Canada'],

@@ -168,6 +168,41 @@ def build(src: Path = SRC_DIR, out: Path = GAZETTEER_PATH) -> None:
     print(f"Gazetteer: {len(places):,} places, {len(names):,} names -> {out}")
 
 
+def compute_anchors(path: Path = GAZETTEER_PATH) -> dict:
+    """Map points for every country and province/state. A country's point is the
+    middle of its towns (averaged on the sphere, so countries across the date
+    line work), so "Canada" isn't drawn on Ottawa; provinces use their own point."""
+    import math
+
+    if not Path(path).exists():
+        return {"countries": {}, "regions": {}}
+    gz = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+    gz.row_factory = sqlite3.Row
+    try:
+        sums: dict[str, list[float]] = {}
+        for r in gz.execute("SELECT country_code, lat, lon FROM gz_places WHERE kind = 'city'"):
+            la, lo = math.radians(r["lat"]), math.radians(r["lon"])
+            acc = sums.setdefault(r["country_code"], [0.0, 0.0, 0.0])
+            acc[0] += math.cos(la) * math.cos(lo)
+            acc[1] += math.cos(la) * math.sin(lo)
+            acc[2] += math.sin(la)
+        countries = {}
+        for r in gz.execute("SELECT country_code, name, lat, lon FROM gz_places WHERE kind = 'country'"):
+            x, y, z = sums.get(r["country_code"], (0, 0, 0))
+            if x or y or z:
+                lat, lon = math.degrees(math.atan2(z, math.hypot(x, y))), math.degrees(math.atan2(y, x))
+            else:
+                lat, lon = r["lat"], r["lon"]
+            countries[r["country_code"]] = {"name": r["name"], "lat": round(lat, 3), "lon": round(lon, 3)}
+        regions = {
+            f"{r['country_code']}.{r['admin1']}": {"name": r["name"], "lat": round(r["lat"], 3), "lon": round(r["lon"], 3)}
+            for r in gz.execute("SELECT country_code, admin1, name, lat, lon FROM gz_places WHERE kind = 'region'")
+        }
+    finally:
+        gz.close()
+    return {"countries": countries, "regions": regions}
+
+
 if __name__ == "__main__":
     download()
     build()

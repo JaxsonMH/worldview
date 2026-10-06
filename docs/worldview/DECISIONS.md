@@ -2,6 +2,37 @@
 
 Newest first. Each entry: what we chose, and why.
 
+## 2026-10-06 — Live sources, topic bar, health check
+
+- **Sources live in the news service, not the globe engine.** One small Python
+  file per source (`news/worldview_news/sources/`), all producing the same
+  event shape, so Live view, cards, "Related news" and later cross-linking
+  (Phase 3) work for every source without extra code. Data is fetched only
+  when a layer is on or a Live view asks, and cached for the source's refresh
+  time (5 min for alerts, a week for power plants), to stay polite.
+- **Added (all free, no sign-up):** BC Wildfire Service, Environment Canada
+  alerts, DriveBC events, NRCan earthquakes, GDACS disasters, volcanoes
+  (Smithsonian GVP + USGS alert levels), NOAA tsunami messages, GDELT
+  protests/clashes (last 24 h, ≥3 mentions), IODA internet outages
+  (critical alerts only), NOAA aurora forecast, WRI power plants (≥100 MW).
+  **Wired but needs a key:** OpenAQ air quality.
+- **Not added, and why:**
+  - *GDELT GEO map API* is gone (404); we read GDELT's 15-minute export files instead.
+  - *ACLED, UCDP, ReliefWeb, Cloudflare Radar, Global Fishing Watch* need an
+    account/approval; easy to add once the owner signs up.
+  - *VIIRS gas flares, Global Energy Monitor, EIA/JODI* need registration or
+    are bulk downloads; later.
+  - *Telegram OSINT* skipped: needs a phone-number account and is mostly
+    individual posts, against our "events, not people" line.
+- **ISW now answers 403** (a Cloudflare "are you a browser?" check) from the
+  build machine. We don't bypass bot checks. It may still work from a home
+  connection; `make health` will say.
+- **Topic bar on the globe:** clicking a topic from "All" shows only that
+  topic (the common case); later clicks add/remove topics. Remembered per browser.
+- **Live TV uses YouTube's privacy-friendly embed** (`youtube-nocookie.com`)
+  of each channel's current live stream, by channel ID, so it keeps working
+  when the day's stream changes.
+
 ## 2026-10-06 — Zoom levels, Live view, a globe with more character
 
 - **Bug (owner):** stories naming a town *and* its province ("Victoria, B.C.")

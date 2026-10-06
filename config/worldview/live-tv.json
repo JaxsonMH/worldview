@@ -1,0 +1,19 @@
+{
+  "_help": "Channels for the globe's Live TV button. Each plays the channel's own live stream on YouTube (when it's live and allows embedding). To add one: find its YouTube channel id (the part after /channel/ in its address) and copy a line.",
+  "channels": [
+    { "name": "CBC News", "region": "Canada", "channel": "UCuFFtHWoLl5fauMMD5Ww2jA" },
+    { "name": "CTV News", "region": "Canada", "channel": "UCi7Zk9baY1tvdlgxIML8MXg" },
+    { "name": "Global News", "region": "Canada", "channel": "UChLtXXpo4Ge1ReTEboVvTDg" },
+    { "name": "Al Jazeera English", "region": "World", "channel": "UCNye-wNBqNL5ZzHSJj3l8Bg" },
+    { "name": "DW News", "region": "World", "channel": "UCknLrEdhRCp1aegoMqRaCZg" },
+    { "name": "France 24 English", "region": "World", "channel": "UCQfwfsi5VrQ8yKZ-UWmAEFg" },
+    { "name": "Sky News", "region": "UK", "channel": "UCoMdktPbSTixAyNGwb-UYkQ" },
+    { "name": "euronews", "region": "Europe", "channel": "UCSrZ3UV4jOidv8ppoVuvW9Q" },
+    { "name": "ABC News", "region": "US", "channel": "UCBi2mrWuNuyYy4gbM6fU18Q" },
+    { "name": "Bloomberg Television", "region": "Business", "channel": "UCIALMKvObZNtJ6AmdCLP7Lg" },
+    { "name": "NHK WORLD-JAPAN", "region": "Asia", "channel": "UCSPEjw8F2nQDtmUKPFNF7_A" },
+    { "name": "CNA", "region": "Asia", "channel": "UC83jt4dlz1Gjl58fzQrrKZg" },
+    { "name": "ABC News (Australia)", "region": "Oceania", "channel": "UCVgO39Bk5sMo66-6o6Spn6Q" },
+    { "name": "NASA", "region": "Space", "channel": "UCLA_DiR1FfKNvjuUpBHmylQ" }
+  ]
+}

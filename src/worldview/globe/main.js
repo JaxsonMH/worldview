@@ -12,6 +12,9 @@ import { h, timeAgo, toast } from '../ui.js';
 import { createMyNews } from './myNews.js';
 import { createInfoCard } from './infoCard.js';
 import { createLiveView } from './liveView.js';
+import { createSourceLayer } from './sourceLayers.js';
+import { createTopicBar } from './topicBar.js';
+import { createLiveTv } from './liveTv.js';
 
 const STORAGE_KEY = 'worldview.globe.layers';
 const BASEMAPS = [
@@ -103,8 +106,24 @@ async function start() {
 
   const configured = layerConfig.groups.flatMap((g) => g.layers);
   const engineIds = new Set(manager.getAll().map((l) => l.id));
+  // Worldview's own live sources (wildfires, alerts, road events, …).
+  const sourceMeta = new Map(
+    ((await newsApi.sources().catch(() => [])) ?? []).map((m) => [m.id, m]),
+  );
+  const sourceLayers = new Map();
+  for (const entry of configured.filter(
+    (l) => l.source && sourceMeta.has(l.source),
+  )) {
+    const layer = createSourceLayer(entry, sourceMeta.get(entry.source), {
+      viewer,
+      card,
+      onExplore: openLive,
+      topicColor: myNews.topicColor,
+    });
+    sourceLayers.set(entry.id, layer);
+  }
   const known = configured.filter(
-    (l) => l.id === 'my-news' || engineIds.has(l.id),
+    (l) => l.id === 'my-news' || engineIds.has(l.id) || sourceLayers.has(l.id),
   );
   const saved = savedLayerChoice();
   const wantOn = new Set(
@@ -112,9 +131,14 @@ async function start() {
   );
 
   const isOn = (id) =>
-    id === 'my-news' ? myNews.enabled : manager.isEnabled(id);
+    id === 'my-news'
+      ? myNews.enabled
+      : sourceLayers.has(id)
+        ? sourceLayers.get(id).enabled
+        : manager.isEnabled(id);
   async function setLayer(id, on) {
     if (id === 'my-news') await myNews.setEnabled(on);
+    else if (sourceLayers.has(id)) await sourceLayers.get(id).setEnabled(on);
     else if (manager.isEnabled(id) !== on)
       await manager.toggle(id, { origin: 'user' });
     saveLayerChoice(known.filter((l) => isOn(l.id)).map((l) => l.id));
@@ -124,6 +148,7 @@ async function start() {
   // ---------- panel ----------
   function layerStatus(id) {
     if (id === 'my-news') return myNews.status();
+    if (sourceLayers.has(id)) return sourceLayers.get(id).status();
     const info = manager.getAll().find((l) => l.id === id);
     if (!info?.enabled) return { text: '' };
     const s = info.stats ?? {};
@@ -249,9 +274,13 @@ async function start() {
           ),
           layers.map((l) => {
             const on = isOn(l.id);
+            // A Worldview source knows whether its key is set; engine layers just say so.
+            const missingKey = l.source
+              ? sourceMeta.get(l.source)?.configured === false
+              : Boolean(l.needsKey);
             const status = on
               ? layerStatus(l.id)
-              : { text: l.needsKey ? `Needs a free ${l.needsKey} key` : '' };
+              : { text: missingKey ? `Needs a free ${l.needsKey} key` : '' };
             return h(
               'label.wv-layer' + (on ? '.is-on' : ''),
               { title: l.about },
@@ -348,7 +377,9 @@ async function start() {
         const count =
           l.id === 'my-news'
             ? myNews.count
-            : manager.getAll().find((x) => x.id === l.id)?.stats?.count;
+            : sourceLayers.has(l.id)
+              ? sourceLayers.get(l.id).count
+              : manager.getAll().find((x) => x.id === l.id)?.stats?.count;
         return Number.isFinite(count)
           ? h(
               'span.wv-stat',
@@ -421,6 +452,9 @@ async function start() {
     refresh();
     renderTicker();
   });
+  for (const layer of sourceLayers.values()) layer.onChange(refresh);
+  createTopicBar($('topic-bar'), myNews);
+  createLiveTv($('tv'), $('tv-button'));
   setInterval(refresh, 15_000);
 
   // ---------- clicks on the globe ----------
@@ -433,6 +467,9 @@ async function start() {
       picked?.id instanceof Cesium.Entity
         ? picked.id
         : nearestEntity(viewer, click.position);
+    const asPick = { id: entity };
+    for (const layer of sourceLayers.values())
+      if (layer.handlePick(asPick)) return;
     if (entity) card.showEntity(entity);
     else card.hide();
   }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
@@ -484,7 +521,8 @@ function nearestEntity(viewer, clickPosition, maxPixels = 14) {
   let bestDistance = maxPixels;
   for (let i = 0; i < viewer.dataSources.length; i++) {
     const source = viewer.dataSources.get(i);
-    if (!source.show || source.name.startsWith('worldview-')) continue;
+    // Our own sources' small dots count too; My News and the Live view handle their own clicks.
+    if (!source.show || /^worldview-(my-news|live)/.test(source.name)) continue;
     for (const entity of source.entities.values) {
       if (!entity.isShowing || !entity.position) continue;
       const position = entity.position.getValue(now);

@@ -2,8 +2,16 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
-const config = JSON.parse(readFileSync(new URL('../../config/worldview/layers.json', import.meta.url), 'utf8'));
-const catalogSource = readFileSync(new URL('../app/constructCatalog.js', import.meta.url), 'utf8');
+const config = JSON.parse(
+  readFileSync(
+    new URL('../../config/worldview/layers.json', import.meta.url),
+    'utf8',
+  ),
+);
+const catalogSource = readFileSync(
+  new URL('../app/constructCatalog.js', import.meta.url),
+  'utf8',
+);
 
 test('layers.json is well formed', () => {
   assert.ok(Array.isArray(config.groups) && config.groups.length > 0);
@@ -12,7 +20,11 @@ test('layers.json is well formed', () => {
   assert.ok(ids.includes('my-news'));
   for (const group of config.groups) {
     assert.ok(group.name, 'every group needs a name');
-    for (const layer of group.layers) assert.ok(layer.id && layer.name, `layer needs id and name: ${JSON.stringify(layer)}`);
+    for (const layer of group.layers)
+      assert.ok(
+        layer.id && layer.name,
+        `layer needs id and name: ${JSON.stringify(layer)}`,
+      );
   }
 });
 
@@ -23,7 +35,16 @@ test('layers left out of the Worldview globe on purpose', () => {
 });
 
 test('the engine catalog still builds the layer factories we rely on', () => {
-  for (const factory of ['createApplicationEarthquakes', 'createApplicationFlights', 'createApplicationSatellites', 'createWeatherLayer', 'createApplicationCables']) {
-    assert.ok(catalogSource.includes(factory), `${factory} is gone from the engine catalog`);
+  for (const factory of [
+    'createApplicationEarthquakes',
+    'createApplicationFlights',
+    'createApplicationSatellites',
+    'createWeatherLayer',
+    'createApplicationCables',
+  ]) {
+    assert.ok(
+      catalogSource.includes(factory),
+      `${factory} is gone from the engine catalog`,
+    );
   }
 });

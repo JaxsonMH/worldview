@@ -27,16 +27,16 @@ Change that with `WORLDVIEW_FETCH_MINUTES=5 ./start.sh`.
 | `make reprocess` | Redo places and topics for every article, after you edit `topics.yaml`, `geoparser.yaml` or `place-aliases.yaml` (your manual topic edits are kept) |
 | `make spot-check` | Print 50 random local/Canadian articles with their pins, to check by eye |
 | `make verify-feeds` | Check every starter feed URL still works (doesn't save anything) |
+| `make health` | Checks everything (place list, database, every feed, every live source, the globe app) and reports ✅ / ⚠️ / ❌ in plain English |
 | `make test` | Run the automated tests |
 | `npm run doctor` | Globe app self-check |
 
 ## Updating
 
 ```
-git pull
-npm ci
-(cd news && uv sync)
+cd ~/worldview && git pull && ./start.sh
 ```
+`start.sh` installs anything new by itself.
 
 ## Where your data lives
 
@@ -60,6 +60,12 @@ Deleting it starts fresh (feeds are re-imported from `config/worldview/feeds.opm
 - Right-click anywhere for a **Live view** of that spot; Esc closes it.
 - "Group by" under My News: Auto follows the zoom, or pin Countries / Provinces / Places.
 - ⟨ hides the layer panel; ☰ Layers brings it back.
+- **Topic bar** (top of the globe): click a topic to show only those stories;
+  click more topics to add them; **All topics** resets. Numbers are story counts.
+- **Live TV** (top right): live news channels (CBC, Al Jazeera, DW…) via YouTube,
+  muted until you unmute. Channels are listed in `config/worldview/live-tv.json`.
+- Click a wildfire, alert, volcano etc. for its details and **Related news**
+  from your feeds nearby.
 
 ## Reader keyboard shortcuts
 

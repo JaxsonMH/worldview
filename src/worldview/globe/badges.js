@@ -91,3 +91,45 @@ export function badge({ count, mix, kind, selected = false, text }) {
   cache.set(key, result);
   return result;
 }
+
+/** Colours for event severity: information, minor, moderate, severe. */
+export const SEVERITY_COLORS = ['#8ecae6', '#ffd166', '#f8961e', '#ef233c'];
+export const SEVERITY_NAMES = ['Information', 'Minor', 'Moderate', 'Severe'];
+
+/**
+ * An event marker: the source's emoji on a disc coloured by severity.
+ * @returns {{image: HTMLCanvasElement, size: number}}
+ */
+export function iconBadge(icon, severity = 0, { selected = false } = {}) {
+  const key = `icon|${icon}|${severity}|${selected}`;
+  if (cache.has(key)) return cache.get(key);
+  const size = 22 + severity * 3;
+  const pad = selected ? 8 : 3;
+  const full = size + pad * 2;
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = full * RATIO;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(RATIO, RATIO);
+  const c = full / 2;
+  const r = size / 2;
+  if (selected) {
+    ctx.beginPath();
+    ctx.arc(c, c, r + pad, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255, 214, 102, 0.55)';
+    ctx.fill();
+  }
+  ctx.beginPath();
+  ctx.arc(c, c, r, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(12, 18, 26, 0.85)';
+  ctx.fill();
+  ctx.lineWidth = 2.5;
+  ctx.strokeStyle = SEVERITY_COLORS[severity] ?? SEVERITY_COLORS[0];
+  ctx.stroke();
+  ctx.font = `${Math.round(size * 0.58)}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(icon, c, c + 1);
+  const result = { image: canvas, size: full };
+  cache.set(key, result);
+  return result;
+}

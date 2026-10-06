@@ -23,10 +23,15 @@
 | ↳ Topic tagger | `news/worldview_news/topics.py` | Feed default → keyword rules → place rules → your manual edits. |
 | ↳ Filters | `news/worldview_news/filters.py` | The one "which articles do you want?" description that both the Reader and the Globe use. |
 | ↳ REST API | `news/worldview_news/api.py` | The web addresses (`/api/news/...`) the app calls. |
+| ↳ Live sources | `news/worldview_news/sources/` | One small file per outside data source (BC wildfires, weather alerts, DriveBC, Canadian quakes, GDACS disasters, volcanoes, tsunami warnings, GDELT protests/clashes, internet outages, aurora, air quality, power plants). Each turns its data into the same simple "event" shape and is only downloaded when you look at it, then remembered for a few minutes. |
+| ↳ Health check | `news/worldview_news/health.py` | `make health`: tests every piece and explains problems in plain English. |
 | **Globe** | `globe.html`, `src/worldview/globe/` | Worldview's home page: the 3D globe with your news and live layers. |
 | ↳ Globe engine | everything outside our folders | God's Eye View supplies the globe, base maps and data layers; our page supplies the interface. |
 | ↳ My News | `src/worldview/globe/myNews.js`, `src/worldview/newsLevels.js` | Stories grouped by country / province / place depending on zoom; ring colours = topic mix. |
-| ↳ Live view | `src/worldview/globe/liveView.js` | Everything live around a spot: cameras, weather, news, quakes, aircraft… |
+| ↳ Live view | `src/worldview/globe/liveView.js` | Everything live around a spot: cameras, weather, news, alerts & events, quakes, aircraft… |
+| ↳ Source layers | `src/worldview/globe/sourceLayers.js` | Draws the live sources on the globe, with a card and "Related news". |
+| ↳ Topic bar | `src/worldview/globe/topicBar.js` | One-click topic filter for the globe. |
+| ↳ Live TV | `src/worldview/globe/liveTv.js`, `config/worldview/live-tv.json` | Live news channels in a small player. |
 | ↳ Layer list | `config/worldview/layers.json` | Which engine layers the panel offers, grouped. |
 | **Reader** | `reader.html`, `src/worldview/reader/` | The news reader page: http://localhost:4173/reader.html |
 | ↳ Shared filter | `src/worldview/newsFilter.js` | The browser's copy of the filter rules, used by Reader *and* Globe; also keeps the filter in the page address. |
@@ -110,5 +115,8 @@ articles as a list; the Globe shows the same articles as pins.
 | `GET /api/news/topics` | Topic list from topics.yaml |
 | `GET/POST/PUT/DELETE /api/news/saved-searches` | Manage saved searches |
 | `GET /api/news/health` | Quick "is it working?" summary |
+| `GET /api/news/sources` | The live sources and whether each needs a key |
+| `GET /api/news/sources/{id}/events` | One source's current events |
+| `GET /api/news/nearby?lat=&lon=&km=` | Every source's events near a spot (used by Live view) |
 
 Try them at http://127.0.0.1:8765/docs while the service is running.
