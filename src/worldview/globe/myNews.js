@@ -1,9 +1,14 @@
-// Worldview Globe: the "My News" layer. Articles from the news service are
-// pinned where they happened, coloured by topic. A story with several places
-// gets one pin per place; clicking it draws a line joining them in the order
-// the story mentions them. Stories only placed at country level go in a
-// per-country marker.
-// The layer uses the same filter object as the Reader (../newsFilter.js).
+// Worldview Globe: the "My News" layer.
+//
+// Stories are grouped into markers by country, province/state or place,
+// depending on how far you're zoomed out (or a level you pick). Each marker's
+// ring shows the topic mix of its stories, with the count in the middle.
+// Click a marker to list its stories and draw glowing lines to the other
+// places those stories mention, at the same level. Click a story to see its
+// own places, numbered in the order it mentions them.
+//
+// The layer uses the same filter object as the Reader (../newsFilter.js);
+// grouping rules live in ../newsLevels.js.
 
 import * as Cesium from 'cesium';
 import {
@@ -14,9 +19,18 @@ import {
   toQuery,
 } from '../newsFilter.js';
 import { newsApi } from '../newsApi.js';
+import {
+  aggregate,
+  collapsePlaces,
+  LEVEL_NAMES,
+  levelForHeight,
+  linksOf,
+  unitsForArticle,
+} from '../newsLevels.js';
 import { h, timeAgo } from '../ui.js';
+import { badge } from './badges.js';
 
-const MAX_ARTICLES = 1000;
+const MAX_ARTICLES = 1500;
 const REFRESH_MS = 5 * 60 * 1000;
 const DEFAULT_FILTER = { last_hours: 24 };
 const TIME_CHOICES = [
@@ -25,47 +39,39 @@ const TIME_CHOICES = [
   [168, '7 days'],
   [720, '30 days'],
 ];
-// Broad "where" topics; a pin is coloured by a subject topic when it has one.
+const LEVEL_CHOICES = [
+  ['auto', 'Auto'],
+  ['country', 'Countries'],
+  ['region', 'Provinces'],
+  ['place', 'Places'],
+];
+// Broad "where" topics; colours come from a subject topic when there is one.
 const BROAD_TOPICS = new Set(['Canada', 'World', 'Local']);
+const LINK_COLOR = Cesium.Color.fromCssColorString('#ffd166');
 
-export function createMyNews({ viewer, card }) {
-  const pins = new Cesium.CustomDataSource('worldview-my-news');
-  const lines = new Cesium.CustomDataSource('worldview-my-news-lines');
-  pins.clustering.enabled = true;
-  pins.clustering.pixelRange = 28;
-  pins.clustering.minimumClusterSize = 3;
-  pins.clustering.clusterEvent.addEventListener((entities, cluster) => {
-    cluster.label.show = true;
-    cluster.label.text = String(entities.length);
-    cluster.label.font = '600 13px system-ui, sans-serif';
-    cluster.label.fillColor = Cesium.Color.WHITE;
-    cluster.label.horizontalOrigin = Cesium.HorizontalOrigin.CENTER;
-    cluster.label.verticalOrigin = Cesium.VerticalOrigin.CENTER;
-    cluster.label.disableDepthTestDistance = Number.POSITIVE_INFINITY;
-    cluster.billboard.show = false;
-    cluster.point.show = true;
-    cluster.point.pixelSize = Math.min(18 + Math.sqrt(entities.length) * 3, 44);
-    cluster.point.color =
-      Cesium.Color.fromCssColorString('#0b6e99').withAlpha(0.85);
-    cluster.point.outlineColor = Cesium.Color.WHITE;
-    cluster.point.outlineWidth = 2;
-    cluster.point.disableDepthTestDistance = Number.POSITIVE_INFINITY;
-  });
-  viewer.dataSources.add(lines);
-  viewer.dataSources.add(pins);
-  pins.show = lines.show = false;
+export function createMyNews({ viewer, card, onExplore }) {
+  const markers = new Cesium.CustomDataSource('worldview-my-news');
+  const overlay = new Cesium.CustomDataSource('worldview-my-news-overlay'); // lines + selected route
+  viewer.dataSources.add(overlay);
+  viewer.dataSources.add(markers);
+  markers.show = overlay.show = false;
 
   const state = {
     enabled: false,
     filter: { ...DEFAULT_FILTER },
-    articles: new Map(), // id -> article
-    shown: 0,
-    unplaced: 0,
+    articles: new Map(),
     total: 0,
     loading: false,
     error: null,
     loadedAt: null,
     topics: [],
+    anchors: { countries: {}, regions: {} },
+    levelChoice: 'auto',
+    level: 'country',
+    groups: { units: new Map(), links: new Map() },
+    selectedUnit: null,
+    selectedArticle: null,
+    showAllLinks: false,
   };
   const listeners = new Set();
   const changed = () => listeners.forEach((fn) => fn());
@@ -75,16 +81,39 @@ export function createMyNews({ viewer, card }) {
     .topics()
     .then((t) => {
       state.topics = t;
-      if (state.enabled) draw();
+      if (state.enabled) regroup();
+    })
+    .catch(() => {});
+  newsApi
+    .anchors()
+    .then((a) => {
+      state.anchors = a;
+      if (state.enabled) regroup();
     })
     .catch(() => {});
 
   const topicColor = (name) =>
-    state.topics.find((t) => t.name === name)?.color ?? '#7a7a7a';
-  function articleColor(a) {
-    const subject =
-      a.topics.find((t) => !BROAD_TOPICS.has(t.topic)) ?? a.topics[0];
-    return topicColor(subject?.topic);
+    state.topics.find((t) => t.name === name)?.color ?? '#8a8f98';
+  const subjectOf = (a) =>
+    (a.topics.find((t) => !BROAD_TOPICS.has(t.topic)) ?? a.topics[0])?.topic;
+
+  /** [color, share] pairs for a set of stories, biggest first, max 5 slices. */
+  function topicMix(articles) {
+    const counts = new Map();
+    for (const a of articles) {
+      const t = subjectOf(a) ?? 'Other';
+      counts.set(t, (counts.get(t) ?? 0) + 1);
+    }
+    const sorted = [...counts.entries()].sort((x, y) => y[1] - x[1]);
+    const top = sorted.slice(0, 4);
+    const rest = sorted.slice(4).reduce((n, [, c]) => n + c, 0);
+    if (rest) top.push(['Other', rest]);
+    return top.map(([t, c]) => [topicColor(t), c / articles.length]);
+  }
+
+  function currentLevel() {
+    if (state.levelChoice !== 'auto') return state.levelChoice;
+    return levelForHeight(viewer.camera.positionCartographic.height);
   }
 
   async function load() {
@@ -98,13 +127,13 @@ export function createMyNews({ viewer, card }) {
           { limit: MAX_ARTICLES },
         ),
       );
-      const keep = [...state.articles.values()].filter((a) => a.pinnedByLink);
+      const linked = [...state.articles.values()].filter((a) => a.pinnedByLink);
       state.articles = new Map(data.articles.map((a) => [a.id, a]));
-      for (const a of keep)
+      for (const a of linked)
         if (!state.articles.has(a.id)) state.articles.set(a.id, a);
       state.total = data.total;
       state.loadedAt = new Date().toISOString();
-      draw();
+      regroup();
     } catch (err) {
       state.error = err.message;
     } finally {
@@ -113,138 +142,323 @@ export function createMyNews({ viewer, card }) {
     }
   }
 
-  function draw() {
-    pins.entities.suspendEvents();
-    pins.entities.removeAll();
-    const byCountry = new Map();
-    let shown = 0;
-    for (const a of state.articles.values()) {
-      const color = Cesium.Color.fromCssColorString(articleColor(a));
-      const fine = a.places.filter((p) => p.precision !== 'country');
-      if (!fine.length) {
-        const country = a.places.find((p) => p.precision === 'country');
-        if (country) {
-          const bucket = byCountry.get(country.country_code) ?? {
-            place: country,
-            articles: [],
-          };
-          bucket.articles.push(a);
-          byCountry.set(country.country_code, bucket);
-        }
-        continue;
-      }
-      shown += 1;
-      for (const p of fine) {
-        pins.entities.add({
-          position: Cesium.Cartesian3.fromDegrees(p.lon, p.lat),
-          point: {
-            pixelSize: p.precision === 'region' ? 9 : 11,
-            color,
-            outlineColor: Cesium.Color.WHITE,
-            outlineWidth: 2,
-            disableDepthTestDistance: Number.POSITIVE_INFINITY,
-          },
-          properties: { worldviewArticle: a.id },
-        });
-      }
-    }
-    for (const [code, bucket] of byCountry) {
-      pins.entities.add({
-        position: Cesium.Cartesian3.fromDegrees(
-          bucket.place.lon,
-          bucket.place.lat,
-        ),
-        // Grey, and bigger the more stories it holds; click to list them.
-        point: {
-          pixelSize: Math.min(10 + Math.sqrt(bucket.articles.length) * 3, 30),
-          color: Cesium.Color.fromCssColorString('#5f6b73').withAlpha(0.85),
-          outlineColor: Cesium.Color.WHITE,
-          outlineWidth: 2,
+  /** Group stories at the current level and redraw markers (and the selection). */
+  function regroup() {
+    state.level = currentLevel();
+    state.groups = aggregate(
+      [...state.articles.values()],
+      state.level,
+      state.anchors,
+    );
+    if (state.selectedUnit && !state.groups.units.has(state.selectedUnit))
+      state.selectedUnit = null;
+    drawMarkers();
+    drawOverlay();
+    changed();
+  }
+
+  function drawMarkers() {
+    markers.entities.suspendEvents();
+    markers.entities.removeAll();
+    // Biggest first, so small markers are drawn on top and stay clickable.
+    const units = [...state.groups.units.values()].sort(
+      (a, b) => b.articles.length - a.articles.length,
+    );
+    for (const unit of units) {
+      const selected = unit.key === state.selectedUnit;
+      const { image, size } = badge({
+        count: unit.articles.length,
+        mix: topicMix(unit.articles),
+        kind: unit.kind,
+        selected,
+      });
+      markers.entities.add({
+        position: Cesium.Cartesian3.fromDegrees(unit.lon, unit.lat),
+        billboard: {
+          image,
+          width: size,
+          height: size,
           disableDepthTestDistance: Number.POSITIVE_INFINITY,
         },
-        properties: { worldviewCountry: code },
+        properties: { worldviewUnit: unit.key },
       });
     }
-    state.countryBuckets = byCountry;
-    state.shown = shown;
-    state.unplaced = [...byCountry.values()].reduce(
-      (n, b) => n + b.articles.length,
-      0,
-    );
-    pins.entities.resumeEvents();
-    if (selectedId && state.articles.has(selectedId))
-      drawRoute(state.articles.get(selectedId));
+    markers.entities.resumeEvents();
     viewer.scene.requestRender();
   }
 
-  let selectedId = null;
-  /** Join a story's places with a line, in the order the story mentions them. */
-  function drawRoute(a) {
-    lines.entities.removeAll();
-    const fine = a ? a.places.filter((p) => p.precision !== 'country') : [];
-    // The selected story's places get their own markers, never hidden in a cluster.
-    fine.forEach((p, i) => {
-      lines.entities.add({
-        position: Cesium.Cartesian3.fromDegrees(p.lon, p.lat),
-        point: {
-          pixelSize: 14,
-          color: Cesium.Color.WHITE,
-          outlineColor: Cesium.Color.fromCssColorString(articleColor(a)),
-          outlineWidth: 4,
-          disableDepthTestDistance: Number.POSITIVE_INFINITY,
-        },
-        properties: { worldviewArticle: a.id },
-      });
+  function addLink(from, to, count, emphasis = 1) {
+    overlay.entities.add({
+      polyline: {
+        positions: [
+          Cesium.Cartesian3.fromDegrees(from.lon, from.lat),
+          Cesium.Cartesian3.fromDegrees(to.lon, to.lat),
+        ],
+        width: (2 + Math.log2(count + 1) * 2) * emphasis,
+        arcType: Cesium.ArcType.GEODESIC,
+        material: new Cesium.PolylineGlowMaterialProperty({
+          color: LINK_COLOR.withAlpha(0.35 + 0.5 * emphasis),
+          glowPower: 0.25,
+        }),
+      },
     });
-    if (fine.length > 1) {
-      lines.entities.add({
-        polyline: {
-          positions: fine.map((p) =>
-            Cesium.Cartesian3.fromDegrees(p.lon, p.lat),
-          ),
-          width: 3,
-          arcType: Cesium.ArcType.GEODESIC,
-          material: new Cesium.PolylineDashMaterialProperty({
-            color: Cesium.Color.fromCssColorString(articleColor(a)),
-            dashLength: 14,
-          }),
-        },
+  }
+
+  /** Connection lines for the selected marker (or all, faintly), and the selected story's route. */
+  function drawOverlay() {
+    overlay.entities.removeAll();
+    const { units, links } = state.groups;
+    if (state.showAllLinks) {
+      for (const link of links.values()) {
+        const a = units.get(link.a);
+        const b = units.get(link.b);
+        if (a && b) addLink(a, b, link.articles.length, 0.35);
+      }
+    }
+    if (state.selectedUnit && !state.selectedArticle) {
+      const from = units.get(state.selectedUnit);
+      for (const link of linksOf(links, state.selectedUnit)) {
+        const to = units.get(link.a === state.selectedUnit ? link.b : link.a);
+        if (from && to) addLink(from, to, link.articles.length);
+      }
+    }
+    if (state.selectedArticle) {
+      const stops = unitsForArticle(
+        state.selectedArticle.places,
+        'place',
+        state.anchors,
+      );
+      for (let i = 1; i < stops.length; i++) addLink(stops[i - 1], stops[i], 1);
+      stops.forEach((stop, i) => {
+        const { image, size } = badge({
+          count: 1,
+          mix: [[topicColor(subjectOf(state.selectedArticle)), 1]],
+          kind: stop.kind,
+          selected: true,
+          text: stops.length > 1 ? String(i + 1) : '',
+        });
+        overlay.entities.add({
+          position: Cesium.Cartesian3.fromDegrees(stop.lon, stop.lat),
+          billboard: {
+            image,
+            width: size,
+            height: size,
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+          },
+          properties: { worldviewArticle: state.selectedArticle.id },
+        });
       });
     }
     viewer.scene.requestRender();
+  }
+
+  // ---------- cards ----------
+
+  function showUnit(key) {
+    const unit = state.groups.units.get(key);
+    if (!unit) return;
+    state.selectedUnit = key;
+    state.selectedArticle = null;
+    drawMarkers();
+    drawOverlay();
+    const connections = linksOf(state.groups.links, key).slice(0, 8);
+    const stories = [...unit.articles].sort((a, b) =>
+      b.published_at.localeCompare(a.published_at),
+    );
+    const mix = new Map();
+    for (const a of stories) {
+      const t = subjectOf(a) ?? 'Other';
+      mix.set(t, (mix.get(t) ?? 0) + 1);
+    }
+    const kindName = {
+      country: 'Country',
+      region: 'Province / state',
+      place: 'Place',
+    }[unit.kind];
+    card.showCustom(
+      [
+        h(
+          'p.wv-card-kicker',
+          `${kindName} · ${stories.length} ${stories.length === 1 ? 'story' : 'stories'}`,
+        ),
+        h('h2', unit.name),
+        h(
+          'div.wv-mixbar',
+          { 'aria-label': 'Topics' },
+          [...mix.entries()]
+            .sort((x, y) => y[1] - x[1])
+            .map(([t, n]) =>
+              h('span', {
+                style: { flex: n, background: topicColor(t) },
+                title: `${t}: ${n}`,
+              }),
+            ),
+        ),
+        h(
+          'div.wv-card-tags',
+          {},
+          [...mix.entries()]
+            .sort((x, y) => y[1] - x[1])
+            .slice(0, 6)
+            .map(([t, n]) =>
+              h(
+                'span.wv-tag',
+                { style: { '--c': topicColor(t) } },
+                `${t} ${n}`,
+              ),
+            ),
+        ),
+        connections.length
+          ? h(
+              'div.wv-connections',
+              {},
+              h('h3', 'Also in these stories'),
+              connections.map((link) => {
+                const other = state.groups.units.get(
+                  link.a === key ? link.b : link.a,
+                );
+                return other
+                  ? h(
+                      'button.wv-chip',
+                      { type: 'button', onclick: () => flyToUnit(other.key) },
+                      `${other.name} · ${link.articles.length}`,
+                    )
+                  : null;
+              }),
+            )
+          : null,
+        h(
+          'div.wv-actions',
+          {},
+          onExplore
+            ? h(
+                'button.wv-btn',
+                {
+                  type: 'button',
+                  onclick: () =>
+                    onExplore({
+                      lat: unit.lat,
+                      lon: unit.lon,
+                      name: unit.name,
+                      kind: unit.kind,
+                    }),
+                },
+                '📡 Live view here',
+              )
+            : null,
+          h(
+            'a.wv-btn.wv-btn-ghost',
+            { href: `/reader.html${readerHashFor(unit)}` },
+            'Open in Reader',
+          ),
+        ),
+        h(
+          'ul.wv-card-list',
+          {},
+          stories.slice(0, 60).map((a) =>
+            h(
+              'li',
+              {},
+              h(
+                'button',
+                { type: 'button', onclick: () => showArticle(a) },
+                h('span.wv-dot', {
+                  style: { background: topicColor(subjectOf(a)) },
+                }),
+                h(
+                  'span',
+                  {},
+                  a.title,
+                  h('small', `${a.feed_title} · ${timeAgo(a.published_at)}`),
+                ),
+              ),
+            ),
+          ),
+        ),
+        stories.length > 60
+          ? h('p.wv-hint', `…and ${stories.length - 60} more in the Reader.`)
+          : null,
+      ],
+      clearSelection,
+    );
+  }
+
+  function readerHashFor(unit) {
+    const f = { ...state.filter };
+    if (unit.kind === 'country') f.country = unit.cc;
+    else if (unit.kind === 'region')
+      Object.assign(f, { country: unit.cc, admin1: unit.admin1 });
+    else f.near = { lat: unit.lat, lon: unit.lon, km: 15, label: unit.name };
+    return filterToHash(f);
+  }
+
+  function flyToUnit(key) {
+    const unit = state.groups.units.get(key);
+    if (!unit) return;
+    const height = { country: 7_000_000, region: 2_500_000, place: 300_000 }[
+      unit.kind
+    ];
+    // Keep the level while flying, so the marker we fly to still exists on arrival.
+    viewer.camera.flyTo({
+      destination: Cesium.Cartesian3.fromDegrees(
+        unit.lon,
+        unit.lat,
+        Math.max(height, viewer.camera.positionCartographic.height * 0.6),
+      ),
+      duration: 1.4,
+      complete: () => showUnit(key),
+    });
   }
 
   function showArticle(a) {
-    // Open the card first: opening it closes the previous story's line.
-    card.showArticle(a, { topicColor, onClose: clearSelection });
-    selectedId = a.id;
-    drawRoute(a);
+    card.showArticle(a, {
+      topicColor,
+      onClose: clearSelection,
+      onExplore: onExplore
+        ? () => {
+            const first = collapsePlaces(a.places)[0];
+            if (first)
+              onExplore({
+                lat: first.lat,
+                lon: first.lon,
+                name: first.name,
+                kind: 'place',
+              });
+          }
+        : null,
+    });
+    state.selectedArticle = a;
+    drawOverlay();
   }
 
   function clearSelection() {
-    selectedId = null;
-    drawRoute(null);
+    const had = state.selectedUnit || state.selectedArticle;
+    state.selectedUnit = null;
+    state.selectedArticle = null;
+    if (had) {
+      drawMarkers();
+      drawOverlay();
+    }
   }
 
   function flyToArticle(a) {
-    const fine = a.places.filter((p) => p.precision !== 'country');
-    const targets = fine.length ? fine : a.places;
-    if (!targets.length) return false;
-    if (targets.length === 1) {
-      const p = targets[0];
+    const stops = unitsForArticle(a.places, 'place', state.anchors);
+    if (!stops.length) return false;
+    if (stops.length === 1) {
+      const s = stops[0];
       const height =
-        p.precision === 'country'
-          ? 3_500_000
-          : p.precision === 'region'
-            ? 900_000
-            : 40_000;
+        s.kind === 'country'
+          ? 4_000_000
+          : s.kind === 'region'
+            ? 1_200_000
+            : 60_000;
       viewer.camera.flyTo({
-        destination: Cesium.Cartesian3.fromDegrees(p.lon, p.lat, height),
+        destination: Cesium.Cartesian3.fromDegrees(s.lon, s.lat, height),
         duration: 1.8,
       });
     } else {
       const rect = Cesium.Rectangle.fromCartographicArray(
-        targets.map((p) => Cesium.Cartographic.fromDegrees(p.lon, p.lat)),
+        stops.map((s) => Cesium.Cartographic.fromDegrees(s.lon, s.lat)),
       );
       const pad = Math.max(rect.width, rect.height) * 0.4 + 0.01;
       viewer.camera.flyTo({
@@ -262,48 +476,31 @@ export function createMyNews({ viewer, card }) {
 
   /** Clicks on the globe: returns true when the click was on My News. */
   function handlePick(picked) {
-    if (!state.enabled || !picked) return false;
-    // A cluster of pins: list its articles.
-    if (Array.isArray(picked.id)) {
-      const ids = new Set();
-      for (const entity of picked.id) {
-        const id = entity.properties?.worldviewArticle?.getValue();
-        if (id) ids.add(id);
-        const code = entity.properties?.worldviewCountry?.getValue();
-        if (code)
-          for (const a of state.countryBuckets.get(code)?.articles ?? [])
-            ids.add(a.id);
-      }
-      if (!ids.size) return false;
-      const list = [...ids].map((id) => state.articles.get(id)).filter(Boolean);
-      card.showArticleList(`${list.length} stories here`, list, {
-        onPick: showArticle,
-      });
+    if (!state.enabled || !(picked?.id instanceof Cesium.Entity)) return false;
+    const props = picked.id.properties;
+    const unitKey = props?.worldviewUnit?.getValue();
+    if (unitKey) {
+      showUnit(unitKey);
       return true;
     }
-    const entity = picked.id;
-    if (!(entity instanceof Cesium.Entity)) return false;
-    const articleId = entity.properties?.worldviewArticle?.getValue();
-    if (articleId) {
-      showArticle(state.articles.get(articleId));
-      return true;
-    }
-    const code = entity.properties?.worldviewCountry?.getValue();
-    if (code) {
-      const bucket = state.countryBuckets.get(code);
-      card.showArticleList(
-        `${bucket.place.name}: stories without a town`,
-        bucket.articles,
-        { onPick: showArticle },
-      );
-      return true;
-    }
+    const articleId = props?.worldviewArticle?.getValue();
+    if (articleId && state.selectedArticle?.id === articleId) return true;
     return false;
   }
 
+  // Regroup when the zoom crosses a level boundary.
+  viewer.camera.moveEnd.addEventListener(() => {
+    if (
+      state.enabled &&
+      state.levelChoice === 'auto' &&
+      currentLevel() !== state.level
+    )
+      regroup();
+  });
+
   async function setEnabled(on) {
     state.enabled = on;
-    pins.show = lines.show = on;
+    markers.show = overlay.show = on;
     clearInterval(timer);
     if (on) {
       timer = setInterval(load, REFRESH_MS);
@@ -342,10 +539,10 @@ export function createMyNews({ viewer, card }) {
     article.pinnedByLink = true;
     if (!state.articles.has(article.id)) {
       state.articles.set(article.id, article);
-      draw();
+      regroup();
     }
-    showArticle(article);
     flyToArticle(article);
+    showArticle(article);
     changed();
   }
 
@@ -353,27 +550,24 @@ export function createMyNews({ viewer, card }) {
     if (state.error)
       return { text: `News service unavailable: ${state.error}`, kind: 'bad' };
     if (state.loading && !state.loadedAt) return { text: 'Loading…' };
-    const parts = [`${state.shown.toLocaleString()} stories on the map`];
-    if (state.unplaced) parts.push(`${state.unplaced} by country only`);
+    const parts = [`${state.articles.size.toLocaleString()} stories`];
     if (state.total > MAX_ARTICLES)
       parts.push(`newest ${MAX_ARTICLES} of ${state.total.toLocaleString()}`);
     if (state.loadedAt) parts.push(`updated ${timeAgo(state.loadedAt)}`);
     return { text: parts.join(' · ') };
   }
 
-  /** Extra controls under the My News switch: time window, active filters, legend. */
+  /** Extra controls under the My News switch. */
   function controls() {
     const f = state.filter;
     const extra = describeFilter({ ...f, last_hours: undefined });
-    const present = new Set();
-    for (const a of state.articles.values()) {
-      const subject =
-        a.topics.find((t) => !BROAD_TOPICS.has(t.topic)) ?? a.topics[0];
-      if (subject) present.add(subject.topic);
-    }
+    const present = new Set(
+      [...state.articles.values()].map(subjectOf).filter(Boolean),
+    );
     return h(
       'div.wv-news-controls',
       {},
+      h('span.wv-mini-label', 'When'),
       h(
         'div.wv-chips',
         { role: 'group', 'aria-label': 'Time window' },
@@ -393,6 +587,45 @@ export function createMyNews({ viewer, card }) {
             label,
           ),
         ),
+      ),
+      h(
+        'span.wv-mini-label',
+        `Group by · now showing ${LEVEL_NAMES[state.level]}`,
+      ),
+      h(
+        'div.wv-chips',
+        { role: 'group', 'aria-label': 'Group stories by' },
+        LEVEL_CHOICES.map(([value, label]) =>
+          h(
+            'button.wv-chip' +
+              (state.levelChoice === value ? '.is-active' : ''),
+            {
+              type: 'button',
+              title:
+                value === 'auto'
+                  ? 'Follow the zoom: countries far out, provinces in between, places up close'
+                  : undefined,
+              onclick: () => {
+                state.levelChoice = value;
+                regroup();
+              },
+            },
+            label,
+          ),
+        ),
+      ),
+      h(
+        'label.wv-check',
+        {},
+        h('input', {
+          type: 'checkbox',
+          checked: state.showAllLinks,
+          onchange: (e) => {
+            state.showAllLinks = e.target.checked;
+            drawOverlay();
+          },
+        }),
+        'Show all connections',
       ),
       extra.length
         ? h(
@@ -419,7 +652,7 @@ export function createMyNews({ viewer, card }) {
       present.size
         ? h(
             'ul.wv-legend',
-            { 'aria-label': 'Pin colours' },
+            { 'aria-label': 'Ring colours' },
             state.topics
               .filter((t) => present.has(t.name))
               .map((t) =>
@@ -439,6 +672,38 @@ export function createMyNews({ viewer, card }) {
     get enabled() {
       return state.enabled;
     },
+    /** Stories near a point, for the live location view. */
+    storiesNear(lat, lon, km) {
+      const out = [];
+      for (const a of state.articles.values()) {
+        if (
+          collapsePlaces(a.places).some(
+            (p) =>
+              p.precision !== 'country' &&
+              distanceKm(lat, lon, p.lat, p.lon) <= km,
+          )
+        )
+          out.push(a);
+      }
+      return out.sort((x, y) => y.published_at.localeCompare(x.published_at));
+    },
+    topicColor,
+    colorOf: (a) => topicColor(subjectOf(a)),
+    get count() {
+      return state.articles.size;
+    },
+    /** Newest stories, for the headline ticker. */
+    latest(n) {
+      return [...state.articles.values()]
+        .sort((x, y) => y.published_at.localeCompare(x.published_at))
+        .slice(0, n);
+    },
+    /** Open a story from elsewhere (ticker, Live view): fly to it and show its card. */
+    openArticle(a) {
+      flyToArticle(a);
+      showArticle(a);
+    },
+    showArticle,
     setEnabled,
     handlePick,
     followLink,
@@ -446,4 +711,14 @@ export function createMyNews({ viewer, card }) {
     controls,
     onChange: (fn) => listeners.add(fn),
   };
+}
+
+function distanceKm(lat1, lon1, lat2, lon2) {
+  const toRad = Math.PI / 180;
+  const a =
+    Math.sin(((lat2 - lat1) * toRad) / 2) ** 2 +
+    Math.cos(lat1 * toRad) *
+      Math.cos(lat2 * toRad) *
+      Math.sin(((lon2 - lon1) * toRad) / 2) ** 2;
+  return 12742 * Math.asin(Math.sqrt(a));
 }

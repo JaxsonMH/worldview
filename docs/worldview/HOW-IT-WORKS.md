@@ -25,7 +25,8 @@
 | ↳ REST API | `news/worldview_news/api.py` | The web addresses (`/api/news/...`) the app calls. |
 | **Globe** | `globe.html`, `src/worldview/globe/` | Worldview's home page: the 3D globe with your news and live layers. |
 | ↳ Globe engine | everything outside our folders | God's Eye View supplies the globe, base maps and data layers; our page supplies the interface. |
-| ↳ My News | `src/worldview/globe/myNews.js` | Article pins coloured by topic; grey dots = stories placed only at country level. |
+| ↳ My News | `src/worldview/globe/myNews.js`, `src/worldview/newsLevels.js` | Stories grouped by country / province / place depending on zoom; ring colours = topic mix. |
+| ↳ Live view | `src/worldview/globe/liveView.js` | Everything live around a spot: cameras, weather, news, quakes, aircraft… |
 | ↳ Layer list | `config/worldview/layers.json` | Which engine layers the panel offers, grouped. |
 | **Reader** | `reader.html`, `src/worldview/reader/` | The news reader page: http://localhost:4173/reader.html |
 | ↳ Shared filter | `src/worldview/newsFilter.js` | The browser's copy of the filter rules, used by Reader *and* Globe; also keeps the filter in the page address. |
@@ -61,6 +62,20 @@ Eye View project can still be pulled in without clashes.
 5. Several places → several pins, in the order the story mentions them.
 
 When a pin is wrong, see [TUNING-PLACES-AND-TOPICS.md](TUNING-PLACES-AND-TOPICS.md).
+
+## Reading the globe
+
+- **Markers** group stories. Far out they're countries, in the middle
+  provinces/states, close up individual places. The ring's colours show the
+  mix of topics; the number is how many stories. Dashed outline = a whole
+  province; double outline = a whole country (stories that don't name a town).
+- **Click a marker**: its stories, and glowing lines to the other places those
+  stories mention, at the same level. A town's own province never counts as
+  a connection.
+- **Live view (📡)**: right-click anywhere (or the 📡 button, or search a
+  place) for what's being reported there right now: live camera pictures,
+  weather, news, earthquakes, aircraft, ships, satellites and more. Each
+  section says where its data came from and when.
 
 ## Reader ↔ Globe
 

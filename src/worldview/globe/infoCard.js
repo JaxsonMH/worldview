@@ -103,7 +103,11 @@ export function createInfoCard(root) {
   /** One news article. */
   function showArticle(
     a,
-    { topicColor = () => '#888', onClose: closed = null } = {},
+    {
+      topicColor = () => '#888',
+      onClose: closed = null,
+      onExplore = null,
+    } = {},
   ) {
     const places = a.places.filter((p) => p.precision !== 'country');
     open(
@@ -153,8 +157,21 @@ export function createInfoCard(root) {
           { href: `/reader.html#article=${a.id}` },
           'Open in Reader',
         ),
+        onExplore
+          ? h(
+              'button.wv-btn.wv-btn-ghost',
+              { type: 'button', onclick: onExplore },
+              '📡 Live view here',
+            )
+          : null,
       ),
     );
+    onClose = closed;
+  }
+
+  /** Any content, with a callback for when the card closes or is replaced. */
+  function showCustom(children, closed = null) {
+    open(...children);
     onClose = closed;
   }
 
@@ -181,5 +198,5 @@ export function createInfoCard(root) {
     );
   }
 
-  return { showEntity, showArticle, showArticleList, hide };
+  return { showEntity, showArticle, showArticleList, showCustom, hide };
 }

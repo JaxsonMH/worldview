@@ -11,6 +11,7 @@ import { newsApi } from '../newsApi.js';
 import { h, timeAgo, toast } from '../ui.js';
 import { createMyNews } from './myNews.js';
 import { createInfoCard } from './infoCard.js';
+import { createLiveView } from './liveView.js';
 
 const STORAGE_KEY = 'worldview.globe.layers';
 const BASEMAPS = [
@@ -26,6 +27,23 @@ function savedLayerChoice() {
     return JSON.parse(localStorage.getItem(STORAGE_KEY)) ?? null;
   } catch {
     return null;
+  }
+}
+
+function loadPref(name, fallback) {
+  try {
+    const value = localStorage.getItem(`worldview.globe.${name}`);
+    return value === null ? fallback : JSON.parse(value);
+  } catch {
+    return fallback;
+  }
+}
+
+function savePref(name, value) {
+  try {
+    localStorage.setItem(`worldview.globe.${name}`, JSON.stringify(value));
+  } catch {
+    // Storage can be unavailable (private windows); the choice just isn't remembered.
   }
 }
 
@@ -48,6 +66,13 @@ async function start() {
     loaderStatus,
   });
   const { viewer } = scene;
+  // Day/night shading: the night side of the Earth is darkened, live.
+  const setLighting = (on) => {
+    viewer.scene.globe.enableLighting = on;
+    viewer.scene.globe.dynamicAtmosphereLighting = on;
+    viewer.scene.requestRender();
+  };
+  setLighting(loadPref('lighting', true));
   // Keep the data credits in the globe's corner rather than under the panel.
   const credits = document.getElementById('cesium-credits');
   if (credits) $('cesiumContainer').append(credits);
@@ -66,7 +91,15 @@ async function start() {
   manager.finalizeRegistrations(catalog.metadata);
 
   const card = createInfoCard($('card'));
-  const myNews = createMyNews({ viewer, card });
+  let liveView = null;
+  const openLive = (spot) => liveView.open(spot);
+  const myNews = createMyNews({ viewer, card, onExplore: openLive });
+  liveView = createLiveView({
+    viewer,
+    root: $('live'),
+    topicColor: myNews.topicColor,
+    onOpenArticle: (a) => myNews.openArticle(a),
+  });
 
   const configured = layerConfig.groups.flatMap((g) => g.layers);
   const engineIds = new Set(manager.getAll().map((l) => l.id));
@@ -123,29 +156,94 @@ async function start() {
     return { text: parts.join(' · ') };
   }
 
-  function renderPanel() {
-    const panel = $('panel');
-    const open = new Set(
-      [...panel.querySelectorAll('details[open]')].map((d) => d.dataset.group),
-    );
-    const first = !panel.childElementCount;
-    panel.replaceChildren(
+  // The panel has a fixed header (title, layer search) and a body that is
+  // redrawn as data arrives, so typing in the search box is never interrupted.
+  const panel = $('panel');
+  const panelBody = h('div.wv-panel-body');
+  let layerQuery = '';
+  const layerSearch = h('input.wv-layer-search', {
+    type: 'search',
+    placeholder: 'Find a layer…',
+    'aria-label': 'Find a layer',
+    oninput: (e) => {
+      layerQuery = e.target.value.trim().toLowerCase();
+      renderPanel();
+    },
+  });
+  panel.replaceChildren(
+    h(
+      'div.wv-panel-head',
+      {},
       h('h2.wv-panel-title', 'Layers'),
+      h(
+        'button.wv-icon-btn',
+        {
+          type: 'button',
+          title: 'Hide the panel (more room for the globe)',
+          'aria-label': 'Hide the layer panel',
+          onclick: () => document.body.classList.add('panel-hidden'),
+        },
+        '⟨',
+      ),
+    ),
+    layerSearch,
+    panelBody,
+  );
+  $('panel-show').addEventListener('click', () =>
+    document.body.classList.remove('panel-hidden'),
+  );
+
+  const matches = (l, group) =>
+    !layerQuery ||
+    `${l.name} ${l.about} ${group.name}`.toLowerCase().includes(layerQuery);
+
+  function renderPanel() {
+    const open = new Set(
+      [...panelBody.querySelectorAll('details[open]')].map(
+        (d) => d.dataset.group,
+      ),
+    );
+    const first = !panelBody.childElementCount;
+    const active = known.filter((l) => isOn(l.id));
+    panelBody.replaceChildren(
+      active.length
+        ? h(
+            'div.wv-active-layers',
+            { 'aria-label': 'Layers switched on' },
+            active.map((l) =>
+              h(
+                'button.wv-pill',
+                {
+                  type: 'button',
+                  title: `Turn off ${l.name}`,
+                  onclick: () => setLayer(l.id, false),
+                },
+                `${l.icon ?? ''} ${l.name}`,
+                h('span', { 'aria-hidden': 'true' }, ' ×'),
+              ),
+            ),
+          )
+        : null,
       ...layerConfig.groups.map((group) => {
-        const layers = group.layers.filter((l) => known.includes(l));
+        const layers = group.layers.filter(
+          (l) => known.includes(l) && matches(l, group),
+        );
         if (!layers.length) return null;
         const onCount = layers.filter((l) => isOn(l.id)).length;
         return h(
           'details.wv-group',
           {
-            open: first
-              ? group.name === 'News' || onCount > 0
-              : open.has(group.name),
+            open:
+              layerQuery ||
+              (first
+                ? group.name === 'News' || onCount > 0
+                : open.has(group.name)),
             'data-group': group.name,
           },
           h(
             'summary',
             {},
+            h('span.wv-group-icon', group.icon ?? ''),
             h('span', group.name),
             onCount ? h('span.wv-count', `${onCount} on`) : null,
           ),
@@ -157,12 +255,7 @@ async function start() {
             return h(
               'label.wv-layer' + (on ? '.is-on' : ''),
               { title: l.about },
-              h('input.wv-switch', {
-                type: 'checkbox',
-                role: 'switch',
-                checked: on,
-                onchange: (e) => setLayer(l.id, e.target.checked),
-              }),
+              h('span.wv-layer-icon', { 'aria-hidden': 'true' }, l.icon ?? '•'),
               h(
                 'span.wv-layer-text',
                 {},
@@ -176,6 +269,13 @@ async function start() {
                     )
                   : null,
               ),
+              h('input.wv-switch', {
+                type: 'checkbox',
+                role: 'switch',
+                checked: on,
+                'aria-label': l.name,
+                onchange: (e) => setLayer(l.id, e.target.checked),
+              }),
             );
           }),
           group.name === 'News' && myNews.enabled ? myNews.controls() : null,
@@ -209,11 +309,24 @@ async function start() {
             ),
           ),
         ),
+        h(
+          'label.wv-check',
+          {},
+          h('input', {
+            type: 'checkbox',
+            checked: viewer.scene.globe.enableLighting,
+            onchange: (e) => {
+              setLighting(e.target.checked);
+              savePref('lighting', e.target.checked);
+            },
+          }),
+          'Day / night shading',
+        ),
       ),
       h(
         'footer.wv-panel-foot',
         {},
-        'Data may be delayed or incomplete; each item shows its source. ',
+        'Right-click anywhere on the globe for a 📡 Live view. Data may be delayed or incomplete; each item shows its source. ',
         h(
           'a',
           {
@@ -224,7 +337,73 @@ async function start() {
         ),
       ),
     );
+    renderStats();
   }
+
+  // ---------- stats strip + headline ticker ----------
+  function renderStats() {
+    const items = known
+      .filter((l) => isOn(l.id))
+      .map((l) => {
+        const count =
+          l.id === 'my-news'
+            ? myNews.count
+            : manager.getAll().find((x) => x.id === l.id)?.stats?.count;
+        return Number.isFinite(count)
+          ? h(
+              'span.wv-stat',
+              { title: l.name },
+              `${l.icon ?? ''} ${count.toLocaleString()}`,
+            )
+          : null;
+      })
+      .filter(Boolean);
+    $('stats').replaceChildren(...items);
+    $('stats').hidden = !items.length;
+  }
+
+  let tickerKey = '';
+  function renderTicker() {
+    const latest = myNews.enabled ? myNews.latest(14) : [];
+    const key = latest.map((a) => a.id).join(',');
+    if (key === tickerKey) return;
+    tickerKey = key;
+    const ticker = $('ticker');
+    ticker.hidden = !latest.length;
+    const items = latest.map((a) =>
+      h(
+        'button.wv-tick',
+        { type: 'button', onclick: () => myNews.openArticle(a) },
+        h('span.wv-dot', { style: { background: myNews.colorOf(a) } }),
+        h('strong', a.feed_title),
+        ' ',
+        a.title,
+        h('small', ` · ${timeAgo(a.published_at)}`),
+      ),
+    );
+    // Two copies so the scroll loops seamlessly.
+    ticker.replaceChildren(
+      h('span.wv-ticker-label', 'Latest'),
+      h(
+        'div.wv-ticker-track',
+        {},
+        h('div.wv-ticker-run', {}, items),
+        h(
+          'div.wv-ticker-run',
+          { 'aria-hidden': 'true' },
+          items.map((n) => n.cloneNode(true)),
+        ),
+      ),
+    );
+    // Cloned buttons need their own click handlers.
+    const clones = ticker.querySelectorAll(
+      '.wv-ticker-run:last-child .wv-tick',
+    );
+    clones.forEach((node, i) =>
+      node.addEventListener('click', () => myNews.openArticle(latest[i])),
+    );
+  }
+
   let currentBasemap = scene.tileset ? 'photoreal' : 'esri-imagery';
 
   // Refresh layer statuses as data arrives (cheap: one small re-render).
@@ -238,13 +417,17 @@ async function start() {
     });
   };
   manager.subscribeActivity?.(refresh);
-  myNews.onChange(refresh);
+  myNews.onChange(() => {
+    refresh();
+    renderTicker();
+  });
   setInterval(refresh, 15_000);
 
   // ---------- clicks on the globe ----------
   const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
   handler.setInputAction((click) => {
     const picked = viewer.scene.pick(click.position);
+    if (liveView.handlePick(picked)) return;
     if (myNews.handlePick(picked)) return;
     const entity =
       picked?.id instanceof Cesium.Entity
@@ -255,7 +438,25 @@ async function start() {
   }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
   // ---------- place search ----------
-  setupPlaceSearch(viewer);
+  // Right-click anywhere: Live view of that spot.
+  handler.setInputAction((click) => {
+    const spot = pointAt(viewer, click.position);
+    if (spot) openLive({ ...spot, kind: 'point' });
+  }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
+  $('live-here').addEventListener('click', () => {
+    const centre = new Cesium.Cartesian2(
+      viewer.canvas.clientWidth / 2,
+      viewer.canvas.clientHeight / 2,
+    );
+    const spot = pointAt(viewer, centre);
+    if (!spot) return toast('Point the globe at somewhere on Earth first.');
+    // Radius from how far you're zoomed out.
+    const km = viewer.camera.positionCartographic.height / 1000 / 4;
+    const radius = [5, 25, 100, 300].find((r) => r >= km) ?? 300;
+    openLive({ ...spot, kind: 'point', radius });
+  });
+
+  setupPlaceSearch(viewer, openLive);
 
   // Turn on the remembered layers, then follow "Show on globe" links.
   $('loading').hidden = true;
@@ -303,7 +504,21 @@ function nearestEntity(viewer, clickPosition, maxPixels = 14) {
   return best;
 }
 
-function setupPlaceSearch(viewer) {
+/** Latitude/longitude under a screen position, or null when it's space. */
+function pointAt(viewer, position) {
+  const cartesian = viewer.camera.pickEllipsoid(
+    position,
+    viewer.scene.globe.ellipsoid,
+  );
+  if (!cartesian) return null;
+  const c = Cesium.Cartographic.fromCartesian(cartesian);
+  return {
+    lat: Cesium.Math.toDegrees(c.latitude),
+    lon: Cesium.Math.toDegrees(c.longitude),
+  };
+}
+
+function setupPlaceSearch(viewer, openLive) {
   const form = $('place-search');
   const input = form.querySelector('input');
   const list = form.querySelector('.wv-suggest');
@@ -322,6 +537,13 @@ function setupPlaceSearch(viewer) {
     });
     list.hidden = true;
     input.value = p.name;
+    openLive({
+      lat: p.lat,
+      lon: p.lon,
+      name: p.name,
+      region: p.region,
+      kind: p.kind === 'city' ? 'place' : p.kind,
+    });
   };
   input.addEventListener('input', () => {
     clearTimeout(timer);

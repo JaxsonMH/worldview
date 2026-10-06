@@ -1,64 +1,194 @@
 {
-  "_help": "Which layers the Worldview globe offers, in which group, and which start switched on. Edit and reload the page. Layer ids come from the globe engine; 'needsKey' names the free key a layer needs (see docs/worldview/ADDING-A-KEY.md).",
+  "_help": "Which layers the Worldview globe offers, in which group, and which start switched on. Edit and reload the page. 'icon' is any emoji. Layer ids come from the globe engine; 'needsKey' names the free key a layer needs (see docs/worldview/ADDING-A-KEY.md).",
   "groups": [
     {
       "name": "News",
       "layers": [
-        { "id": "my-news", "name": "My News", "on": true, "about": "Your feeds' articles, pinned where they happened" }
-      ]
+        {
+          "id": "my-news",
+          "name": "My News",
+          "on": true,
+          "about": "Your feeds' articles, pinned where they happened",
+          "icon": "📰"
+        }
+      ],
+      "icon": "📰"
     },
     {
       "name": "Hazards & weather",
       "layers": [
-        { "id": "earthquakes", "name": "Earthquakes (24h)", "about": "USGS, magnitude 2.5+" },
-        { "id": "local-firms", "name": "Active fires", "about": "NASA FIRMS satellite fire detections", "needsKey": "NASA FIRMS" },
-        { "id": "fire-perimeters", "name": "Wildfire perimeters (US)", "about": "NIFC wildfire outlines" },
-        { "id": "weather-radar", "name": "Rain radar", "about": "NOAA nowCOAST (North America)" },
-        { "id": "weather-satellite", "name": "Clouds", "about": "NOAA satellite cloud imagery" },
-        { "id": "weather-lightning", "name": "Lightning", "about": "NOAA lightning density" },
-        { "id": "weather-cyclones", "name": "Hurricanes & cyclones", "about": "NOAA hurricane centres" },
-        { "id": "wind", "name": "Wind", "about": "Forecast wind (GFS / ECMWF)" }
-      ]
+        {
+          "id": "earthquakes",
+          "name": "Earthquakes (24h)",
+          "about": "USGS, magnitude 2.5+",
+          "icon": "🌋"
+        },
+        {
+          "id": "local-firms",
+          "name": "Active fires",
+          "about": "NASA FIRMS satellite fire detections",
+          "needsKey": "NASA FIRMS",
+          "icon": "🔥"
+        },
+        {
+          "id": "fire-perimeters",
+          "name": "Wildfire perimeters (US)",
+          "about": "NIFC wildfire outlines",
+          "icon": "🧯"
+        },
+        {
+          "id": "weather-radar",
+          "name": "Rain radar",
+          "about": "NOAA nowCOAST (North America)",
+          "icon": "🌧️"
+        },
+        {
+          "id": "weather-satellite",
+          "name": "Clouds",
+          "about": "NOAA satellite cloud imagery",
+          "icon": "☁️"
+        },
+        {
+          "id": "weather-lightning",
+          "name": "Lightning",
+          "about": "NOAA lightning density",
+          "icon": "⚡"
+        },
+        {
+          "id": "weather-cyclones",
+          "name": "Hurricanes & cyclones",
+          "about": "NOAA hurricane centres",
+          "icon": "🌀"
+        },
+        {
+          "id": "wind",
+          "name": "Wind",
+          "about": "Forecast wind (GFS / ECMWF)",
+          "icon": "💨"
+        }
+      ],
+      "icon": "⚠️"
     },
     {
       "name": "Air & space",
       "layers": [
-        { "id": "flights", "name": "Flights", "about": "Live aircraft positions (ADS-B)" },
-        { "id": "military", "name": "Military flights", "about": "Military aircraft broadcasting positions" },
-        { "id": "satellites", "name": "Satellites", "about": "CelesTrak orbits" },
-        { "id": "rocket-launches", "name": "Space launches (30 days)", "about": "Launch Library 2" }
-      ]
+        {
+          "id": "flights",
+          "name": "Flights",
+          "about": "Live aircraft positions (ADS-B)",
+          "icon": "✈️"
+        },
+        {
+          "id": "military",
+          "name": "Military flights",
+          "about": "Military aircraft broadcasting positions",
+          "icon": "🛩️"
+        },
+        {
+          "id": "satellites",
+          "name": "Satellites",
+          "about": "CelesTrak orbits",
+          "icon": "🛰️"
+        },
+        {
+          "id": "rocket-launches",
+          "name": "Space launches (30 days)",
+          "about": "Launch Library 2",
+          "icon": "🚀"
+        }
+      ],
+      "icon": "✈️"
     },
     {
       "name": "Sea",
       "layers": [
-        { "id": "ais-live-vessels", "name": "Ships", "about": "Live AIS ship positions", "needsKey": "AISStream" }
-      ]
+        {
+          "id": "ais-live-vessels",
+          "name": "Ships",
+          "about": "Live AIS ship positions",
+          "needsKey": "AISStream",
+          "icon": "🚢"
+        }
+      ],
+      "icon": "🌊"
     },
     {
       "name": "Infrastructure",
       "layers": [
-        { "id": "telegeography-submarine-cables", "name": "Undersea cables", "about": "TeleGeography" },
-        { "id": "local-datacenters", "name": "Data centres", "about": "Mapped data centres" },
-        { "id": "local-dams", "name": "Dams (US)", "about": "US Army Corps of Engineers" },
-        { "id": "military-installations", "name": "Military bases", "about": "Mapped in OpenStreetMap" }
-      ]
+        {
+          "id": "telegeography-submarine-cables",
+          "name": "Undersea cables",
+          "about": "TeleGeography",
+          "icon": "🔌"
+        },
+        {
+          "id": "local-datacenters",
+          "name": "Data centres",
+          "about": "Mapped data centres",
+          "icon": "🖥️"
+        },
+        {
+          "id": "local-dams",
+          "name": "Dams (US)",
+          "about": "US Army Corps of Engineers",
+          "icon": "🏞️"
+        },
+        {
+          "id": "military-installations",
+          "name": "Military bases",
+          "about": "Mapped in OpenStreetMap",
+          "icon": "🪖"
+        }
+      ],
+      "icon": "🏗️"
     },
     {
       "name": "Getting around",
       "layers": [
-        { "id": "traffic", "name": "Road traffic", "about": "Traffic flow where available" },
-        { "id": "transit", "name": "Transit vehicles", "about": "Live buses and trains (GTFS-RT)" },
-        { "id": "bikeshare", "name": "Bike share", "about": "Station availability" },
-        { "id": "cctv", "name": "Public traffic cameras", "about": "Road agency cameras (incl. DriveBC)" }
-      ]
+        {
+          "id": "traffic",
+          "name": "Road traffic",
+          "about": "Traffic flow where available",
+          "icon": "🚗"
+        },
+        {
+          "id": "transit",
+          "name": "Transit vehicles",
+          "about": "Live buses and trains (GTFS-RT)",
+          "icon": "🚌"
+        },
+        {
+          "id": "bikeshare",
+          "name": "Bike share",
+          "about": "Station availability",
+          "icon": "🚲"
+        },
+        {
+          "id": "cctv",
+          "name": "Public traffic cameras",
+          "about": "Road agency cameras (incl. DriveBC)",
+          "icon": "📷"
+        }
+      ],
+      "icon": "🚦"
     },
     {
       "name": "Other",
       "layers": [
-        { "id": "radio", "name": "Radio stations", "about": "Radio Browser" },
-        { "id": "recent-imagery", "name": "Recent satellite imagery", "about": "NASA GIBS daily imagery" }
-      ]
+        {
+          "id": "radio",
+          "name": "Radio stations",
+          "about": "Radio Browser",
+          "icon": "📻"
+        },
+        {
+          "id": "recent-imagery",
+          "name": "Recent satellite imagery",
+          "about": "NASA GIBS daily imagery",
+          "icon": "🗺️"
+        }
+      ],
+      "icon": "✨"
     }
   ]
 }

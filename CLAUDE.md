@@ -241,8 +241,9 @@ globe layers), `src/worldview/` + `reader.html` + `globe.html` (our pages), `ser
 `server/standalone/vite.config.js` (+2 lines), `src/tooling/viteBuild.test.mjs` (plugin order),
 `scripts/check-import-directions.mjs` (our page entries).
 
-UI direction (owner, 2026-10-06): clean, modern, data-first. No GEV "spy" styling or
-branding in Worldview pages; GEV's own UI stays reachable as "Classic view" only.
+UI direction (owner, 2026-10-06): clean, modern, data-first, but with character (owner found
+the first plain version "soulless"). No GEV "spy" styling or branding in Worldview pages; GEV's
+own UI stays reachable as "Classic view" only. Owner wants rich per-location live views.
 
 - **Phase 0:** ✔ repo is the GEV fork ✔ GEV boots keyless on Node 24 (`npm run doctor`)
   ✔ `scripts/worldview/setup-mac.sh` + `docs/worldview/SETUP-MAC.md` written
@@ -260,5 +261,9 @@ branding in Worldview pages; GEV's own UI stays reachable as "Classic view" only
   ✔ layer panel grouped by subject with live status / "needs a key" / "unavailable"
   ✔ My News layer (topic colours, clusters, country buckets, route line on selection, time window)
   ✔ "Show on globe" ↔ "Open in Reader" round trip ✔ click cards for engine layers
+  ✔ zoom-aware grouping (country / province / place) with per-level connections; province/country
+  named only as context no longer creates lines (`newsLevels.js`)
+  ✔ Live view: cameras (live pictures), weather, news, quakes, aircraft, ships, satellites… for any spot
+  ✔ "night atlas" visual refresh, layer search/icons, ticker, day/night shading
   ☐ owner check on the Mac ☐ `make health` ☐ new layers (GDELT, GDACS, BC Wildfire, EC alerts…)
-  ☐ custom time window on the globe ☐ bring across CCTV viewer / key setup from Classic view.
+  ☐ custom time window on the globe ☐ key setup inside Worldview (still in Classic view).

@@ -5,25 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Worldview · Globe</title>
   <link rel="icon" type="image/svg+xml" href="/worldview-icon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/src/worldview/globe/globe.css" />
 </head>
-<body>
+<body class="wv-globe-page">
   <header class="wv-top">
-    <a class="wv-brand" href="/globe.html"><img src="/worldview-icon.svg" alt="" width="20" height="20" />Worldview</a>
+    <a class="wv-brand" href="/globe.html"><img src="/worldview-icon.svg" alt="" width="22" height="22" />Worldview</a>
     <nav class="wv-tabs" aria-label="Views">
       <a class="wv-tab" href="/reader.html">Reader</a>
       <a class="wv-tab is-active" href="/globe.html" aria-current="page">Globe</a>
     </nav>
     <form id="place-search" class="wv-place-search" role="search">
-      <input type="search" placeholder="Go to a place…" aria-label="Go to a place" autocomplete="off" />
+      <input type="search" placeholder="Go to a place… (opens its Live view)" aria-label="Go to a place" autocomplete="off" />
       <div class="wv-suggest" hidden></div>
     </form>
+    <div id="stats" class="wv-stats" aria-label="What's on the globe" hidden></div>
   </header>
   <div class="wv-stage">
-    <aside id="panel" class="wv-panel" aria-label="Layers"></aside>
     <div id="cesiumContainer" class="wv-globe"></div>
-    <div id="card" class="wv-card" hidden></div>
-    <div id="loading" class="wv-loading"><span class="loader-status">Loading the globe…</span></div>
+    <aside id="panel" class="wv-panel wv-glass" aria-label="Layers"></aside>
+    <button id="panel-show" class="wv-panel-show wv-glass" type="button" aria-label="Show the layer panel">☰ Layers</button>
+    <div id="card" class="wv-card wv-glass" hidden></div>
+    <aside id="live" class="wv-live wv-glass" aria-label="Live view" hidden></aside>
+    <button id="live-here" class="wv-fab" type="button" title="Everything live around the middle of the screen. Tip: right-click any spot.">📡 Live view</button>
+    <div id="ticker" class="wv-ticker wv-glass" aria-label="Latest headlines" hidden></div>
+    <div id="loading" class="wv-loading"><span class="wv-loading-globe" aria-hidden="true"></span><span class="loader-status">Loading the globe…</span></div>
   </div>
   <div id="toast" class="wv-toast" role="alert" hidden></div>
   <script type="module" src="/src/worldview/globe/main.js"></script>

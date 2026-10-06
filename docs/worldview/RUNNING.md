@@ -55,6 +55,12 @@ Deleting it starts fresh (feeds are re-imported from `config/worldview/feeds.opm
 | Reader says "News service offline" | The Python half isn't running. Stop and run `./start.sh` again and read the first error it prints. |
 | No pins on anything | The place list is missing: `cd news && uv run python -m worldview_news gazetteer`, then `make reprocess`. |
 
+## Globe tips
+
+- Right-click anywhere for a **Live view** of that spot; Esc closes it.
+- "Group by" under My News: Auto follows the zoom, or pin Countries / Provinces / Places.
+- ⟨ hides the layer panel; ☰ Layers brings it back.
+
 ## Reader keyboard shortcuts
 
 `j` / `k` next / previous article · `s` star · `m` read/unread · `o` open the original.

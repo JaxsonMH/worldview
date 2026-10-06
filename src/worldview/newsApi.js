@@ -28,6 +28,9 @@ export const newsApi = {
   markRead: (query) => call('POST', '/articles/mark-read', query),
   facets: () => call('GET', '/facets'),
   topics: () => call('GET', '/topics'),
+  anchors: () => call('GET', '/anchors'),
+  placeNearest: (lat, lon) =>
+    call('GET', `/places/nearest?lat=${lat}&lon=${lon}`),
   placeSearch: (q) => call('GET', `/places/search?q=${encodeURIComponent(q)}`),
   feeds: () => call('GET', '/feeds'),
   addFeed: (feed) => call('POST', '/feeds', feed),

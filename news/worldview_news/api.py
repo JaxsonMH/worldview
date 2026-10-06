@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import sqlite3
 import threading
 from contextlib import asynccontextmanager
@@ -19,7 +20,7 @@ from fastapi import FastAPI, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 
 from . import config
-from .db import connect, init_db
+from .db import connect, haversine_km, init_db
 from .feedcheck import check_feed, make_client
 from .fetcher import fetch_all, fetch_feed, iso
 from .filters import ArticleFilter, build_query, select_articles
@@ -277,6 +278,70 @@ def create_app(db_path=None, start_scheduler: bool = True, import_opml: bool = T
 
         homes = load_settings().get("home_regions") or {}
         return (homes.get("Local") or {}).get("country", "")
+
+    anchors_cache: dict = {}
+
+    @app.get("/api/news/anchors")
+    def anchors():
+        """Map points for every country and province/state, used when the globe
+        groups stories by country or province. A country's point is the middle of
+        its towns (so "Canada" isn't drawn on Ottawa); provinces use the gazetteer's."""
+        if anchors_cache:
+            return anchors_cache
+        gz = gazetteer()
+        if not gz:
+            return {"countries": {}, "regions": {}}
+        try:
+            sums: dict[str, list[float]] = {}
+            for r in gz.execute("SELECT country_code, lat, lon FROM gz_places WHERE kind = 'city'"):
+                la, lo = math.radians(r["lat"]), math.radians(r["lon"])
+                acc = sums.setdefault(r["country_code"], [0.0, 0.0, 0.0])
+                acc[0] += math.cos(la) * math.cos(lo)
+                acc[1] += math.cos(la) * math.sin(lo)
+                acc[2] += math.sin(la)
+            countries = {}
+            for r in gz.execute("SELECT country_code, name, lat, lon FROM gz_places WHERE kind = 'country'"):
+                x, y, z = sums.get(r["country_code"], (0, 0, 0))
+                if x or y or z:  # average on the sphere, so countries across the date line work
+                    lat = math.degrees(math.atan2(z, math.hypot(x, y)))
+                    lon = math.degrees(math.atan2(y, x))
+                else:
+                    lat, lon = r["lat"], r["lon"]
+                countries[r["country_code"]] = {"name": r["name"], "lat": round(lat, 3), "lon": round(lon, 3)}
+            regions = {
+                f"{r['country_code']}.{r['admin1']}": {"name": r["name"], "lat": round(r["lat"], 3), "lon": round(r["lon"], 3)}
+                for r in gz.execute("SELECT country_code, admin1, name, lat, lon FROM gz_places WHERE kind = 'region'")
+            }
+        finally:
+            gz.close()
+        anchors_cache.update(countries=countries, regions=regions)
+        return anchors_cache
+
+    @app.get("/api/news/places/nearest")
+    def place_nearest(lat: float, lon: float):
+        """Name a point on the globe: the nearest town (or else province/country)."""
+        gz = gazetteer()
+        if not gz:
+            return None
+        try:
+            box = 1.5
+            rows = gz.execute(
+                """SELECT p.name, p.kind, p.country_code, p.admin1, p.lat, p.lon, p.population,
+                          (SELECT r.name FROM gz_places r WHERE r.kind = 'region' AND r.country_code = p.country_code
+                             AND r.admin1 = p.admin1) AS region
+                   FROM gz_places p WHERE p.kind = 'city' AND p.population >= 1000
+                   AND p.lat BETWEEN ? AND ? AND p.lon BETWEEN ? AND ?""",
+                (lat - box, lat + box, lon - box * 2, lon + box * 2),
+            ).fetchall()
+            if not rows:
+                return None
+            # The biggest town within 15 km ("London", not "Lambeth"), otherwise the nearest.
+            close = [r for r in rows if haversine_km(lat, lon, r["lat"], r["lon"]) <= 15]
+            best = (max(close, key=lambda r: r["population"]) if close
+                    else min(rows, key=lambda r: haversine_km(lat, lon, r["lat"], r["lon"])))
+            return dict(best) | {"distance_km": round(haversine_km(lat, lon, best["lat"], best["lon"]), 1)}
+        finally:
+            gz.close()
 
     @app.get("/api/news/places/search")
     def place_search(q: str, limit: int = 8):

@@ -53,7 +53,7 @@ class ArticleFilter(BaseModel):
     near: Near | None = None
     min_confidence: float = Field(default=0.6, ge=0, le=1)
     sort: Literal["newest", "oldest", "source", "topic"] = "newest"
-    limit: int = Field(default=100, ge=1, le=1000)
+    limit: int = Field(default=100, ge=1, le=3000)  # the globe asks for up to ~1,500 at once
     offset: int = Field(default=0, ge=0)
 
 

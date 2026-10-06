@@ -62,3 +62,12 @@ def test_facets_and_mark_read_on_empty_db(tmp_path):
 def test_single_article_has_places_and_topics(tmp_path):
     with make_client(tmp_path) as c:
         assert c.get("/api/news/articles/1").status_code == 404
+
+
+def test_anchors_and_nearest_without_gazetteer_are_safe(tmp_path, monkeypatch):
+    import worldview_news.api as api
+
+    monkeypatch.setattr(api, "GAZETTEER_PATH", tmp_path / "missing.sqlite3")
+    with make_client(tmp_path) as c:
+        assert c.get("/api/news/anchors").json() == {"countries": {}, "regions": {}}
+        assert c.get("/api/news/places/nearest?lat=48.4&lon=-123.4").json() is None

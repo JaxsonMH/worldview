@@ -2,6 +2,46 @@
 
 Newest first. Each entry: what we chose, and why.
 
+## 2026-10-06 — Zoom levels, Live view, a globe with more character
+
+- **Bug (owner):** stories naming a town *and* its province ("Victoria, B.C.")
+  drew a line from the town to the middle of BC, so lines converged on
+  province centres. **Fix:** a province is treated as context and dropped when
+  the story names a place inside it; a country likewise
+  (`src/worldview/newsLevels.js`, tested). The database still stores both, so
+  Reader location filters are unaffected.
+- **Zoom-aware grouping** (owner's idea): far out, stories group by
+  **country**; mid-zoom by **province/state**; close in by **place**
+  (thresholds 6,000 km / 700 km camera height). "Auto" follows the zoom,
+  or the level can be pinned. Clicking a marker draws glowing lines to the
+  other places its stories mention *at that level*, so a BC–Ontario story
+  connects BC and Ontario at province level and Victoria and Ottawa at place
+  level. Replaces Cesium's pixel clustering, which grouped things that merely
+  looked close.
+- Country markers use the **middle of the country's towns** (spherical
+  average), not the capital, so "Canada" isn't drawn on Ottawa
+  (`/api/news/anchors`).
+- **Markers** are drawn on a canvas: a ring split by the topic mix of the
+  stories, with the count inside. (Not Cesium text labels, which GEV's tests
+  forbid.)
+- **Live view** (owner: "all camera and real-world data for a location"):
+  right-click anywhere, use the 📡 button, search a place, or click "Live
+  view here" on a story. It uses GEV's tool catalog (`src/tools`): the same
+  read-only queries GEV built for assistants, each with an area. Shows live
+  traffic-camera pictures (DriveBC etc.), weather, nearby news, quakes,
+  fires, aircraft, ships, satellites, transit and traffic, refreshed every
+  minute, each with its source and time. Unavailable sections say why
+  (needs a key / not covered here). This is the first piece of the Phase 3
+  "what else is here?" idea.
+- **Look:** the globe page uses a dark "night atlas" theme (globe and data
+  are the bright things), glass panels over a full-screen globe, Space
+  Grotesk headings, an emoji icon per layer, day/night shading on the Earth,
+  a scrolling headline ticker, and a stats strip. The Reader keeps its
+  lighter, reading-first look.
+- **Panel:** layer search, chips for layers that are on (× to switch off),
+  collapsible panel.
+- News API page limit raised to 3,000 (the globe loads up to 1,500 stories).
+
 ## 2026-10-06 — A clean Worldview globe instead of restyling God's Eye View
 
 - Owner wanted a modern, simple, data-first globe without GEV's "spy"
